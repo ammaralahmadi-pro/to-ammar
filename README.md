@@ -20,12 +20,15 @@ python3 -m http.server 8080
 
 المصادقة تتم بالكامل من المتصفح (SPA + PKCE) بدون أي سيرفر خلفي أو أسرار.
 
+> هذا المشروع مُعد للعمل مع حساب Microsoft **شخصي** (Outlook.com / Hotmail / Live) — بدون حاجة لحساب عمل أو مؤسسة.
+
 1. اذهب إلى [Microsoft Entra admin center](https://entra.microsoft.com) → **App registrations** → **New registration**.
-2. اختر نوع التطبيق: **Single-page application (SPA)**.
-3. أضف **Redirect URI** برابط موقعك بعد النشر (مثلاً `https://your-app.vercel.app`)، وأضف أيضًا `http://localhost:8080` للتجربة المحلية.
-4. من **API permissions** أضف **Microsoft Graph → Delegated permissions → Calendars.Read** فقط.
-5. انسخ **Application (client) ID** من صفحة **Overview**.
-6. افتح `js/config.js` وضع القيمة في `clientId`.
+2. في **Supported account types** اختر: **Personal Microsoft accounts only**.
+3. اختر نوع التطبيق: **Single-page application (SPA)**.
+4. أضف **Redirect URI** برابط موقعك بعد النشر (مثلاً `https://your-app.vercel.app`)، وأضف أيضًا `http://localhost:8080` للتجربة المحلية.
+5. من **API permissions** أضف **Microsoft Graph → Delegated permissions → Calendars.Read** فقط.
+6. انسخ **Application (client) ID** من صفحة **Overview**.
+7. افتح `js/config.js` وضع القيمة في `clientId` (الـ `authority` مضبوط مسبقًا على `consumers` للحسابات الشخصية).
 
 بعد ذلك، افتح الموقع واضغط "تسجيل الدخول بـ Outlook" لمنح الإذن، وستظهر مواعيد اليوم تلقائيًا.
 
