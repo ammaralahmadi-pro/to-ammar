@@ -28,7 +28,7 @@ const GRAPH_SCOPES = ["Calendars.Read"];
 // 7. من "OAuth consent screen" أضف نطاق (scope) القراءة فقط لـ Calendar (calendar.readonly)
 
 const GOOGLE_CONFIG = {
-  clientId: "YOUR_GOOGLE_OAUTH_CLIENT_ID.apps.googleusercontent.com", // استبدل هذا بالـ Client ID الخاص بك
+  clientId: "1026566951330-15nh1e1rnu6ekeor3rkja76fm904hgqj.apps.googleusercontent.com", // استبدل هذا بالـ Client ID الخاص بك
 };
 
 const GOOGLE_SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
