@@ -16,8 +16,25 @@
         <span class="brand-icon">🗓️</span>
         <h1>يومي</h1>
       </div>
-      <div class="date-display" id="todayDate"></div>
+      <div class="header-actions">
+        <div class="date-display" id="todayDate"></div>
+        <button id="syncToggleBtn" class="icon-btn" title="مزامنة المهام بين جهازين" aria-label="مزامنة">🔗</button>
+      </div>
     </header>
+
+    <!-- لوحة مزامنة المهام بين جهازين -->
+    <section id="syncPanel" class="panel sync-panel hidden">
+      <div class="panel-header">
+        <h2>مزامنة المهام بين جهازين</h2>
+      </div>
+      <p class="sync-hint">حط نفس "رمز المزامنة" في التطبيق على الجهازين، وهتشوف نفس المهام أول بأول على الاتنين.</p>
+      <div class="sync-form">
+        <input type="text" id="syncCodeInput" placeholder="اكتب رمز المزامنة (مثلاً: ammar-tasks-2026)" maxlength="80" />
+        <button id="syncSaveBtn" class="btn btn-primary">حفظ وربط</button>
+        <button id="syncClearBtn" class="btn btn-ghost">إلغاء الربط</button>
+      </div>
+      <div id="syncStatus" class="status-msg"></div>
+    </section>
 
     <main class="content">
       <!-- قسم المواعيد -->
@@ -60,8 +77,13 @@
   <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
   <!-- Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Firebase (لمزامنة المهام بين جهازين) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script src="js/tasks.js"></script>
+  <script src="js/sync.js"></script>
   <script src="js/calendar.js"></script>
   <script src="js/googleCalendar.js"></script>
   <script src="js/app.js"></script>

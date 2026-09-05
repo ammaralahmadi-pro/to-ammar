@@ -32,3 +32,24 @@ const GOOGLE_CONFIG = {
 };
 
 const GOOGLE_SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
+
+// إعدادات مزامنة المهام بين جهازين (Firebase Firestore)
+// عشان المهام تظهر نفسها على جوالك التاني أول بأول، محتاجين قاعدة بيانات
+// سحابية بسيطة ومجانية. الخطوات:
+// 1. افتح https://console.firebase.google.com -> Add project (اختر أي اسم)
+// 2. من داخل المشروع: Build -> Firestore Database -> Create database
+//    (اختر وضع "Start in production mode" ثم عدّل القواعد كما في README)
+// 3. من Build -> Authentication -> Sign-in method -> فعّل "Anonymous"
+// 4. من إعدادات المشروع (⚙️) -> Your apps -> أضف تطبيق ويب (</>) وانسخ
+//    القيم اللي تظهر لك وحطها تحت
+// 5. افتح الموقع على الجهازين، وحط نفس "رمز المزامنة" (Sync Code) في الاتنين
+//    من زر 🔗 في أعلى الصفحة — أي كلمة سر بسيطة يعرفها جهازيك بس
+
+const FIREBASE_CONFIG = {
+  apiKey: "YOUR_FIREBASE_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};

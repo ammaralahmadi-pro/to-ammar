@@ -50,9 +50,46 @@ body {
   margin: 0;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .date-display {
   color: var(--text-muted);
   font-size: 14px;
+}
+
+.sync-panel {
+  margin-bottom: 16px;
+}
+
+.sync-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+
+.sync-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.sync-form input[type="text"] {
+  flex: 1;
+  min-width: 180px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.sync-form input:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
 .content {

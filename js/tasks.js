@@ -1,27 +1,47 @@
-// إدارة المهام اليومية (تخزين محلي في المتصفح)
+// إدارة المهام اليومية (تخزين محلي في المتصفح + رفع اختياري للمزامنة)
 
 const TasksStore = (() => {
   const STORAGE_PREFIX = "yawmi.tasks."; // مفتاح لكل يوم على حدة
 
-  function todayKey() {
+  let onChangeHandler = null; // يُستدعى بعد أي تعديل محلي (لرفعه للمزامنة)
+
+  function dateKey() {
     const d = new Date();
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
     const day = String(d.getDate()).padStart(2, "0");
-    return `${STORAGE_PREFIX}${y}-${m}-${day}`;
+    return `${y}-${m}-${day}`;
+  }
+
+  function storageKey() {
+    return `${STORAGE_PREFIX}${dateKey()}`;
   }
 
   function load() {
     try {
-      const raw = localStorage.getItem(todayKey());
+      const raw = localStorage.getItem(storageKey());
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];
     }
   }
 
+  function saveLocal(tasks) {
+    localStorage.setItem(storageKey(), JSON.stringify(tasks));
+  }
+
   function save(tasks) {
-    localStorage.setItem(todayKey(), JSON.stringify(tasks));
+    saveLocal(tasks);
+    if (onChangeHandler) onChangeHandler(tasks);
+  }
+
+  // يستبدل المهام محليًا من غير ما ينادي onChangeHandler (لتفادي حلقة مزامنة لا نهائية)
+  function replaceAll(tasks) {
+    saveLocal(tasks);
+  }
+
+  function onChange(handler) {
+    onChangeHandler = handler;
   }
 
   function add(title, time) {
@@ -59,5 +79,5 @@ const TasksStore = (() => {
     return tasks;
   }
 
-  return { load, add, toggleDone, remove, update };
+  return { dateKey, load, replaceAll, onChange, add, toggleDone, remove, update };
 })();

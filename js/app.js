@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderDate();
   renderTasks();
   setupTaskForm();
+  setupSync();
   await setupCalendar();
 });
 
@@ -93,6 +94,74 @@ function renderTasks() {
     li.appendChild(body);
     li.appendChild(deleteBtn);
     list.appendChild(li);
+  }
+}
+
+// ---------- مزامنة المهام بين جهازين ----------
+
+function setupSync() {
+  const toggleBtn = document.getElementById("syncToggleBtn");
+  const panel = document.getElementById("syncPanel");
+  const codeInput = document.getElementById("syncCodeInput");
+  const saveBtn = document.getElementById("syncSaveBtn");
+  const clearBtn = document.getElementById("syncClearBtn");
+  const statusEl = document.getElementById("syncStatus");
+
+  if (!SyncService.isConfigured()) {
+    toggleBtn.classList.add("hidden");
+    return;
+  }
+
+  toggleBtn.addEventListener("click", () => {
+    panel.classList.toggle("hidden");
+  });
+
+  const existingCode = SyncService.getSyncCode();
+  if (existingCode) codeInput.value = existingCode;
+
+  saveBtn.addEventListener("click", () => {
+    const code = codeInput.value.trim();
+    if (!code) return;
+    SyncService.setSyncCode(code);
+    startSyncing(code);
+  });
+
+  clearBtn.addEventListener("click", () => {
+    SyncService.stop();
+    SyncService.clearSyncCode();
+    codeInput.value = "";
+    statusEl.textContent = "تم إلغاء الربط. المهام دلوقتي محلية على هذا الجهاز بس.";
+    statusEl.classList.remove("error");
+  });
+
+  // كل تعديل محلي على المهام يترفع تلقائيًا لو فيه رمز مزامنة مفعّل
+  TasksStore.onChange((tasks) => {
+    SyncService.pushTasks(TasksStore.dateKey(), tasks).catch(() => {
+      statusEl.textContent = "تعذر رفع آخر تعديل للمزامنة، هيتحاول تاني لاحقًا.";
+      statusEl.classList.add("error");
+    });
+  });
+
+  if (existingCode) {
+    startSyncing(existingCode);
+  }
+
+  function startSyncing(code) {
+    statusEl.classList.remove("error");
+    statusEl.textContent = "جارٍ الربط...";
+
+    SyncService.subscribe(
+      TasksStore.dateKey(),
+      (remoteTasks) => {
+        TasksStore.replaceAll(remoteTasks);
+        renderTasks();
+        statusEl.textContent = `متزامن ✓ (رمز: ${code})`;
+      },
+      () => {
+        statusEl.textContent = "تعذر الاتصال بالمزامنة. تأكد من رمز المزامنة والاتصال بالإنترنت.";
+        statusEl.classList.add("error");
+      }
+    );
   }
 }
 
