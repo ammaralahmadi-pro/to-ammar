@@ -1,9 +1,13 @@
 // منطق الواجهة الرئيسي: ربط المهام والمواعيد بالصفحة
 
+let lastExternalEvents = []; // آخر مواعيد جاية من Outlook/Google (تُحدَّث عند كل تحميل)
+
 document.addEventListener("DOMContentLoaded", async () => {
   renderDate();
   renderTasks();
   setupTaskForm();
+  setupAppointmentForm();
+  renderAllEvents();
   setupSync();
   await setupCalendar();
 });
@@ -134,9 +138,16 @@ function setupSync() {
     statusEl.classList.remove("error");
   });
 
-  // كل تعديل محلي على المهام يترفع تلقائيًا لو فيه رمز مزامنة مفعّل
+  // كل تعديل محلي على المهام أو المواعيد الشخصية يترفع تلقائيًا لو فيه رمز مزامنة مفعّل
   TasksStore.onChange((tasks) => {
-    SyncService.pushTasks(TasksStore.dateKey(), tasks).catch(() => {
+    SyncService.pushField("tasksByDate", TasksStore.dateKey(), tasks).catch(() => {
+      statusEl.textContent = "تعذر رفع آخر تعديل للمزامنة، هيتحاول تاني لاحقًا.";
+      statusEl.classList.add("error");
+    });
+  });
+
+  AppointmentsStore.onChange((appointments) => {
+    SyncService.pushField("appointmentsByDate", AppointmentsStore.dateKey(), appointments).catch(() => {
       statusEl.textContent = "تعذر رفع آخر تعديل للمزامنة، هيتحاول تاني لاحقًا.";
       statusEl.classList.add("error");
     });
@@ -150,11 +161,26 @@ function setupSync() {
     statusEl.classList.remove("error");
     statusEl.textContent = "جارٍ الربط...";
 
-    SyncService.subscribe(
+    SyncService.subscribeField(
+      "tasksByDate",
       TasksStore.dateKey(),
       (remoteTasks) => {
         TasksStore.replaceAll(remoteTasks);
         renderTasks();
+        statusEl.textContent = `متزامن ✓ (رمز: ${code})`;
+      },
+      () => {
+        statusEl.textContent = "تعذر الاتصال بالمزامنة. تأكد من رمز المزامنة والاتصال بالإنترنت.";
+        statusEl.classList.add("error");
+      }
+    );
+
+    SyncService.subscribeField(
+      "appointmentsByDate",
+      AppointmentsStore.dateKey(),
+      (remoteAppointments) => {
+        AppointmentsStore.replaceAll(remoteAppointments);
+        renderAllEvents();
         statusEl.textContent = `متزامن ✓ (رمز: ${code})`;
       },
       () => {
@@ -289,12 +315,9 @@ async function setupCalendar() {
     ]);
 
     const events = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
-    events.sort((a, b) => {
-      if (a.isAllDay !== b.isAllDay) return a.isAllDay ? -1 : 1;
-      return (a.start || "").localeCompare(b.start || "");
-    });
 
-    renderEvents(events);
+    lastExternalEvents = events;
+    renderAllEvents();
 
     const hasFailure = results.some((r) => r.status === "rejected");
     if (hasFailure) {
@@ -310,11 +333,50 @@ async function setupCalendar() {
   }
 }
 
+// ---------- المواعيد الشخصية (تضيفها إنت بنفسك) ----------
+
+function setupAppointmentForm() {
+  const form = document.getElementById("appointmentForm");
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const titleInput = document.getElementById("appointmentTitle");
+    const timeInput = document.getElementById("appointmentTime");
+    const title = titleInput.value.trim();
+    if (!title) return;
+    AppointmentsStore.add(title, timeInput.value);
+    titleInput.value = "";
+    timeInput.value = "";
+    renderAllEvents();
+  });
+}
+
+// يدمج مواعيد Outlook/Google (lastExternalEvents) مع المواعيد الشخصية المضافة يدويًا ويعرضهم مرتبين
+function renderAllEvents() {
+  const personalEvents = AppointmentsStore.load().map((a) => ({
+    id: a.id,
+    title: a.title,
+    start: a.time ? `${AppointmentsStore.dateKey()}T${a.time}:00` : null,
+    isAllDay: !a.time,
+    source: "personal",
+  }));
+
+  const events = [...lastExternalEvents, ...personalEvents];
+  events.sort((a, b) => {
+    if (a.isAllDay !== b.isAllDay) return a.isAllDay ? -1 : 1;
+    return (a.start || "").localeCompare(b.start || "");
+  });
+
+  renderEvents(events);
+}
+
 function renderEvents(events) {
   const listEl = document.getElementById("eventsList");
+  const emptyMsg = document.getElementById("eventsEmpty");
   listEl.innerHTML = "";
 
-  const sourceLabels = { outlook: "Outlook", google: "Google" };
+  if (emptyMsg) emptyMsg.classList.toggle("hidden", events.length > 0);
+
+  const sourceLabels = { outlook: "Outlook", google: "Google", personal: "شخصي" };
 
   for (const ev of events) {
     const li = document.createElement("li");
@@ -355,6 +417,19 @@ function renderEvents(events) {
 
     li.appendChild(timeEl);
     li.appendChild(info);
+
+    if (ev.source === "personal") {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "task-delete";
+      deleteBtn.setAttribute("aria-label", "حذف الموعد");
+      deleteBtn.textContent = "✕";
+      deleteBtn.addEventListener("click", () => {
+        AppointmentsStore.remove(ev.id);
+        renderAllEvents();
+      });
+      li.appendChild(deleteBtn);
+    }
+
     listEl.appendChild(li);
   }
 }

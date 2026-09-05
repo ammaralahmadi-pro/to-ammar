@@ -18,16 +18,16 @@
       </div>
       <div class="header-actions">
         <div class="date-display" id="todayDate"></div>
-        <button id="syncToggleBtn" class="icon-btn" title="مزامنة المهام بين جهازين" aria-label="مزامنة">🔗</button>
+        <button id="syncToggleBtn" class="icon-btn" title="مزامنة بين جهازين" aria-label="مزامنة">🔗</button>
       </div>
     </header>
 
-    <!-- لوحة مزامنة المهام بين جهازين -->
+    <!-- لوحة مزامنة المهام والمواعيد بين جهازين -->
     <section id="syncPanel" class="panel sync-panel hidden">
       <div class="panel-header">
-        <h2>مزامنة المهام بين جهازين</h2>
+        <h2>مزامنة بين جهازين</h2>
       </div>
-      <p class="sync-hint">حط نفس "رمز المزامنة" في التطبيق على الجهازين، وهتشوف نفس المهام أول بأول على الاتنين.</p>
+      <p class="sync-hint">حط نفس "رمز المزامنة" في التطبيق على الجهازين، وهتشوف نفس المهام والمواعيد اللي تضيفها أول بأول على الاتنين.</p>
       <div class="sync-form">
         <input type="text" id="syncCodeInput" placeholder="اكتب رمز المزامنة (مثلاً: ammar-tasks-2026)" maxlength="80" />
         <button id="syncSaveBtn" class="btn btn-primary">حفظ وربط</button>
@@ -49,6 +49,11 @@
           <button id="msSignInBtn" class="btn btn-outline">تسجيل الدخول بـ Outlook</button>
           <button id="msSignOutBtn" class="btn btn-ghost hidden">تسجيل الخروج من Outlook</button>
         </div>
+        <form id="appointmentForm" class="task-form">
+          <input type="text" id="appointmentTitle" placeholder="أضف موعد جديد..." required maxlength="200" />
+          <input type="time" id="appointmentTime" />
+          <button type="submit" class="btn btn-primary">إضافة موعد</button>
+        </form>
         <div id="calendarStatus" class="status-msg"></div>
         <ul id="eventsList" class="events-list"></ul>
       </section>
@@ -83,6 +88,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="js/config.js"></script>
   <script src="js/tasks.js"></script>
+  <script src="js/appointments.js"></script>
   <script src="js/sync.js"></script>
   <script src="js/calendar.js"></script>
   <script src="js/googleCalendar.js"></script>

@@ -1,13 +1,13 @@
-// مزامنة المهام بين جهازين عبر Firebase Firestore (اختياري)
+// مزامنة المهام والمواعيد الشخصية بين جهازين عبر Firebase Firestore (اختياري)
 // فكرة العمل: كل جهازين يستخدمون نفس "رمز المزامنة" يشتركون في نفس المستند
-// في Firestore، فأي مهمة تُضاف من جهاز تظهر فورًا في الجهاز التاني.
+// في Firestore، فأي تعديل من جهاز يظهر فورًا في الجهاز التاني.
 
 const SyncService = (() => {
   const SYNC_CODE_KEY = "yawmi.syncCode";
 
   let db = null;
-  let unsubscribe = null;
   let ready = false;
+  const unsubscribers = {}; // fieldName -> unsubscribe function
 
   function isConfigured() {
     return (
@@ -46,21 +46,22 @@ const SyncService = (() => {
     return db.collection("syncGroups").doc(syncCode);
   }
 
-  // يستمع لتغييرات مهام اليوم القادمة من الجهاز التاني وينادي onRemoteChange بالمصفوفة الجديدة
-  async function subscribe(dateKey, onRemoteChange, onError) {
+  // يستمع لتغييرات حقل معيّن (مثلاً tasksByDate أو appointmentsByDate) القادمة
+  // من الجهاز التاني وينادي onRemoteChange بالمصفوفة الجديدة
+  async function subscribeField(fieldName, dateKey, onRemoteChange, onError) {
     const syncCode = getSyncCode();
     if (!syncCode) return false;
 
     const initOk = await ensureInit();
     if (!initOk) return false;
 
-    if (unsubscribe) unsubscribe();
+    if (unsubscribers[fieldName]) unsubscribers[fieldName]();
 
-    unsubscribe = docRefFor(syncCode).onSnapshot(
+    unsubscribers[fieldName] = docRefFor(syncCode).onSnapshot(
       (snap) => {
         const data = snap.data();
-        const tasks = (data && data.tasksByDate && data.tasksByDate[dateKey]) || [];
-        onRemoteChange(tasks);
+        const items = (data && data[fieldName] && data[fieldName][dateKey]) || [];
+        onRemoteChange(items);
       },
       (err) => {
         if (onError) onError(err);
@@ -70,14 +71,14 @@ const SyncService = (() => {
   }
 
   function stop() {
-    if (unsubscribe) {
-      unsubscribe();
-      unsubscribe = null;
+    for (const key of Object.keys(unsubscribers)) {
+      unsubscribers[key]();
+      delete unsubscribers[key];
     }
   }
 
-  // يرفع مهام يوم معيّن إلى Firestore (دمج بدون حذف باقي الأيام)
-  async function pushTasks(dateKey, tasks) {
+  // يرفع بيانات يوم معيّن لحقل معيّن إلى Firestore (دمج بدون حذف باقي الأيام/الحقول)
+  async function pushField(fieldName, dateKey, items) {
     const syncCode = getSyncCode();
     if (!syncCode) return;
 
@@ -86,11 +87,20 @@ const SyncService = (() => {
 
     await docRefFor(syncCode).set(
       {
-        tasksByDate: { [dateKey]: tasks },
+        [fieldName]: { [dateKey]: items },
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       },
       { merge: true }
     );
+  }
+
+  // اختصارات للمهام (توافقًا مع الاستخدام الحالي)
+  function subscribe(dateKey, onRemoteChange, onError) {
+    return subscribeField("tasksByDate", dateKey, onRemoteChange, onError);
+  }
+
+  function pushTasks(dateKey, tasks) {
+    return pushField("tasksByDate", dateKey, tasks);
   }
 
   return {
@@ -99,6 +109,8 @@ const SyncService = (() => {
     setSyncCode,
     clearSyncCode,
     subscribe,
+    subscribeField,
+    pushField,
     stop,
     pushTasks,
   };

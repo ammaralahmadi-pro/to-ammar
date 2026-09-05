@@ -223,6 +223,7 @@ body {
 }
 .event-badge-outlook { background: #0f6cbd; }
 .event-badge-google { background: #34a853; }
+.event-badge-personal { background: var(--primary); }
 
 .task-form {
   display: flex;
