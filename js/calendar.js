@@ -93,6 +93,7 @@ const CalendarService = (() => {
       end: ev.end && ev.end.dateTime,
       isAllDay: ev.isAllDay,
       location: ev.location && ev.location.displayName,
+      source: "outlook",
     }));
   }
 

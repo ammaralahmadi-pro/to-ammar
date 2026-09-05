@@ -87,6 +87,7 @@ body {
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  margin-bottom: 12px;
 }
 
 .btn {
@@ -172,8 +173,19 @@ body {
 }
 
 .event-info { display: flex; flex-direction: column; gap: 2px; }
+.event-title-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .event-title { font-size: 14px; font-weight: 500; }
 .event-location { font-size: 12px; color: var(--text-muted); }
+
+.event-badge {
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-weight: 600;
+  color: #fff;
+}
+.event-badge-outlook { background: #0f6cbd; }
+.event-badge-google { background: #34a853; }
 
 .task-form {
   display: flex;

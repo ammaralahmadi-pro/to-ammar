@@ -15,3 +15,20 @@ const MSAL_CONFIG = {
 };
 
 const GRAPH_SCOPES = ["Calendars.Read"];
+
+// إعدادات ربط Google Calendar
+// الخطوات:
+// 1. افتح https://console.cloud.google.com -> أنشئ مشروع جديد (أو استخدم موجود)
+// 2. من "APIs & Services" -> Library فعّل "Google Calendar API"
+// 3. من "APIs & Services" -> Credentials -> Create Credentials -> OAuth client ID
+// 4. نوع التطبيق: Web application
+// 5. أضف "Authorized JavaScript origins" برابط موقعك (مثلاً https://your-app.vercel.app)
+//    وأضف أيضًا http://localhost:8080 للتجربة المحلية
+// 6. انسخ "Client ID" وحطه تحت في clientId
+// 7. من "OAuth consent screen" أضف نطاق (scope) القراءة فقط لـ Calendar (calendar.readonly)
+
+const GOOGLE_CONFIG = {
+  clientId: "YOUR_GOOGLE_OAUTH_CLIENT_ID.apps.googleusercontent.com", // استبدل هذا بالـ Client ID الخاص بك
+};
+
+const GOOGLE_SCOPES = "https://www.googleapis.com/auth/calendar.readonly";
