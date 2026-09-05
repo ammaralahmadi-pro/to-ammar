@@ -1,0 +1,11 @@
+{
+  "name": "يومي - مهامك ومواعيدك",
+  "short_name": "يومي",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f5f6fb",
+  "theme_color": "#4f46e5",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": []
+}

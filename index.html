@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>يومي</title>
+  <meta name="description" content="مهامك ومواعيد Outlook في مكان واحد" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#4f46e5" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">🗓️</span>
+        <h1>يومي</h1>
+      </div>
+      <div class="date-display" id="todayDate"></div>
+    </header>
+
+    <main class="content">
+      <!-- قسم المواعيد -->
+      <section class="panel calendar-panel">
+        <div class="panel-header">
+          <h2>مواعيد اليوم</h2>
+          <div class="calendar-actions">
+            <button id="refreshCalendarBtn" class="icon-btn" title="تحديث" aria-label="تحديث">↻</button>
+            <button id="msSignInBtn" class="btn btn-outline">تسجيل الدخول بـ Outlook</button>
+            <button id="msSignOutBtn" class="btn btn-ghost hidden">تسجيل الخروج</button>
+          </div>
+        </div>
+        <div id="calendarStatus" class="status-msg"></div>
+        <ul id="eventsList" class="events-list"></ul>
+      </section>
+
+      <!-- قسم المهام -->
+      <section class="panel tasks-panel">
+        <div class="panel-header">
+          <h2>مهام اليوم</h2>
+        </div>
+        <form id="taskForm" class="task-form">
+          <input type="text" id="taskTitle" placeholder="أضف مهمة جديدة..." required maxlength="200" />
+          <input type="time" id="taskTime" />
+          <button type="submit" class="btn btn-primary">إضافة</button>
+        </form>
+        <ul id="tasksList" class="tasks-list"></ul>
+        <p id="tasksEmpty" class="empty-msg hidden">لا توجد مهام اليوم بعد، أضف أول مهمة لك.</p>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span>يومي — مهامك ومواعيدك في مكان واحد</span>
+    </footer>
+  </div>
+
+  <!-- MSAL Browser (Microsoft Authentication Library) -->
+  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/tasks.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
