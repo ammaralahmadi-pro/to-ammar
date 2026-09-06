@@ -1,0 +1,24 @@
+{
+  "name": "helpdesk-bot",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "botbuilder": "^4.23.1",
+    "botbuilder-dialogs": "^4.23.1",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^2.7.0",
+    "restify": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.15",
+    "@types/node-fetch": "^2.6.11",
+    "@types/restify": "^8.5.12",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.5.4"
+  }
+}

@@ -1,0 +1,128 @@
+// مخطط قاعدة البيانات — يطابق نموذج البيانات في وثيقة المتطلبات (القسم ٥)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  END_USER
+  AGENT
+  TEAM_LEAD
+  ADMIN
+}
+
+model User {
+  id             String   @id @default(uuid())
+  entraObjectId  String   @unique // oid من توكن Entra ID
+  displayName    String
+  email          String   @unique
+  department     String?
+  role           Role     @default(END_USER)
+  createdAt      DateTime @default(now())
+
+  ticketsRaised     Ticket[]  @relation("RaisedBy")
+  ticketsAssigned   Ticket[]  @relation("AssignedTo")
+  comments          Comment[]
+  attachments       Attachment[]
+  auditLogs         AuditLog[]
+}
+
+model Category {
+  id                String     @id @default(uuid())
+  name              String
+  parentCategoryId  String?
+  parentCategory    Category?  @relation("CategoryTree", fields: [parentCategoryId], references: [id])
+  subCategories     Category[] @relation("CategoryTree")
+  defaultPriorityId String?
+  defaultPriority   Priority?  @relation(fields: [defaultPriorityId], references: [id])
+  tickets           Ticket[]
+}
+
+model Priority {
+  id                    String   @id @default(uuid())
+  name                  String   // عاجلة / مرتفعة / متوسطة / منخفضة
+  responseSlaMinutes    Int
+  resolutionSlaMinutes  Int
+  tickets               Ticket[]
+  categories            Category[]
+}
+
+model TicketStatus {
+  id      String   @id @default(uuid())
+  name    String   // جديدة / قيد المعالجة / بانتظار الرد / تم الحل / مغلقة
+  isFinal Boolean  @default(false)
+  tickets Ticket[]
+}
+
+model Ticket {
+  id              String        @id @default(uuid())
+  title           String
+  description     String
+  categoryId      String
+  category        Category      @relation(fields: [categoryId], references: [id])
+  priorityId      String
+  priority        Priority      @relation(fields: [priorityId], references: [id])
+  statusId        String
+  status          TicketStatus  @relation(fields: [statusId], references: [id])
+  requesterId     String
+  requester       User          @relation("RaisedBy", fields: [requesterId], references: [id])
+  assignedAgentId String?
+  assignedAgent   User?         @relation("AssignedTo", fields: [assignedAgentId], references: [id])
+
+  responseDueAt   DateTime?
+  resolutionDueAt DateTime?
+  resolvedAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  comments    Comment[]
+  attachments Attachment[]
+  slaEvents   SlaEvent[]
+}
+
+model Comment {
+  id         String   @id @default(uuid())
+  ticketId   String
+  ticket     Ticket   @relation(fields: [ticketId], references: [id])
+  authorId   String
+  author     User     @relation(fields: [authorId], references: [id])
+  body       String
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}
+
+model Attachment {
+  id           String   @id @default(uuid())
+  ticketId     String
+  ticket       Ticket   @relation(fields: [ticketId], references: [id])
+  fileName     String
+  blobUrl      String
+  uploadedById String
+  uploadedBy   User     @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+model SlaEvent {
+  id          String    @id @default(uuid())
+  ticketId    String
+  ticket      Ticket    @relation(fields: [ticketId], references: [id])
+  eventType   String    // RESPONSE / RESOLUTION
+  dueAt       DateTime
+  breachedAt  DateTime?
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  entityType    String
+  entityId      String
+  action        String
+  performedById String
+  performedBy   User     @relation(fields: [performedById], references: [id])
+  timestamp     DateTime @default(now())
+}
