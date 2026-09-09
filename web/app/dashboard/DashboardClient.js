@@ -33,9 +33,11 @@ function formatDayHeading(dateStr) {
   const diffDays = Math.round((date - today) / 86400000);
   const dayName = DAY_LABELS[date.getDay()];
   const numeric = date.toLocaleDateString('ar-SA', { day: 'numeric', month: 'long' });
-  if (diffDays === 0) return `اليوم · ${dayName} ${numeric}`;
-  if (diffDays === 1) return `غدًا · ${dayName} ${numeric}`;
-  return `${dayName} ${numeric}`;
+  const hijri = date.toLocaleDateString('ar-SA-u-ca-islamic-umalqura', { day: 'numeric', month: 'long' });
+  const full = `${dayName} ${numeric} (${hijri} هـ)`;
+  if (diffDays === 0) return `اليوم · ${full}`;
+  if (diffDays === 1) return `غدًا · ${full}`;
+  return full;
 }
 
 export default function DashboardClient() {
