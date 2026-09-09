@@ -60,15 +60,9 @@ router.get('/google/callback', async (req, res) => {
     });
 
     const sessionToken = jwt.sign({ userId: user.id }, env.jwtSecret, { expiresIn: '30d' });
-    res.cookie('session', sessionToken, {
-      httpOnly: true,
-      secure: env.nodeEnv === 'production',
-      // الواجهة (Vercel) والخادم (Railway) على نطاقين مختلفين، فالكوكي يحتاج
-      // SameSite=None حتى يُرسَل مع طلبات fetch من الواجهة
-      sameSite: env.nodeEnv === 'production' ? 'none' : 'lax',
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-    });
-    res.redirect(`${env.frontendUrl}/dashboard`);
+    // نمرّر الجلسة كتوكن في الرابط بدل كوكي — متصفحات الجوال (خصوصًا Safari)
+    // تحجب كوكيز الطرف الثالث بين نطاق الواجهة (Vercel) ونطاق الخادم (Railway)
+    res.redirect(`${env.frontendUrl}/auth/callback?token=${sessionToken}`);
   } catch (err) {
     console.error('Google OAuth callback failed:', err);
     res.redirect(`${env.frontendUrl}/?error=server_error`);

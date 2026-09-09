@@ -3,7 +3,8 @@ const env = require('./env');
 const prisma = require('./prisma');
 
 async function requireAuth(req, res, next) {
-  const token = req.cookies.session;
+  const authHeader = req.headers.authorization || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
   if (!token) return res.status(401).json({ error: 'not_authenticated' });
 
   try {
