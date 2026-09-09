@@ -63,7 +63,9 @@ router.get('/google/callback', async (req, res) => {
     res.cookie('session', sessionToken, {
       httpOnly: true,
       secure: env.nodeEnv === 'production',
-      sameSite: 'lax',
+      // الواجهة (Vercel) والخادم (Railway) على نطاقين مختلفين، فالكوكي يحتاج
+      // SameSite=None حتى يُرسَل مع طلبات fetch من الواجهة
+      sameSite: env.nodeEnv === 'production' ? 'none' : 'lax',
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     res.redirect(`${env.frontendUrl}/dashboard`);
