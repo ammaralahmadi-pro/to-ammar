@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  name              String
+  pictureUrl        String?
+  googleId          String   @unique
+  colorTag          String   // "primary" | "secondary" — يحدد شارة اللون في الواجهة
+  accessTokenEnc    String
+  refreshTokenEnc   String
+  tokenExpiry       DateTime
+  createdAt         DateTime @default(now())
+
+  ownedEvents Event[]     @relation("OwnedEvents")
+  eventCopies EventCopy[]
+}
+
+model Event {
+  id         String   @id @default(cuid())
+  title      String
+  location   String?
+  notes      String?
+  startAt    DateTime
+  endAt      DateTime
+  allDay     Boolean  @default(false)
+  visibility String   @default("shared") // "shared" | "mine"
+  ownerId    String
+  owner      User     @relation("OwnedEvents", fields: [ownerId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  copies EventCopy[]
+}
+
+// نسخة الحدث المكتوبة فعليًا في تقويم Google لكل مستخدم — تمكّن التزامن الثنائي
+// (تحديث/حذف الحدث المشترك يلغي كل نسخه عبر googleEventId الخاص بكل حساب)
+model EventCopy {
+  id            String @id @default(cuid())
+  eventId       String
+  event         Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User   @relation(fields: [userId], references: [id])
+  googleEventId String
+  googleCalendarId String @default("primary")
+
+  @@unique([eventId, userId])
+}
