@@ -50,6 +50,7 @@ export default function DashboardClient() {
   const [formState, setFormState] = useState(null); // null | 'new' | event object
   const [saving, setSaving] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [tokenCopied, setTokenCopied] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -109,6 +110,16 @@ export default function DashboardClient() {
     router.replace('/');
   }
 
+  async function handleCopyWidgetToken() {
+    try {
+      await navigator.clipboard.writeText(api.getToken());
+      setTokenCopied(true);
+      setTimeout(() => setTokenCopied(false), 2500);
+    } catch {
+      setError('تعذّر نسخ الرمز. جرّب من متصفح يدعم النسخ التلقائي.');
+    }
+  }
+
   return (
     <main className="min-h-screen pb-28 bg-[#161b3f] text-white">
       <header className="sticky top-0 z-30 bg-[#161b3f]/95 backdrop-blur border-b border-white/10">
@@ -122,9 +133,14 @@ export default function DashboardClient() {
               {user && <p className="text-[11px] text-white/40 mt-0.5">{user.name}</p>}
             </div>
           </div>
-          <button onClick={handleLogout} className="text-xs font-bold text-white/40 px-2 py-1">
-            تسجيل الخروج
-          </button>
+          <div className="flex items-center gap-1">
+            <button onClick={handleCopyWidgetToken} className="text-xs font-bold text-white/40 px-2 py-1">
+              {tokenCopied ? 'تم النسخ ✓' : 'رمز الويدجت'}
+            </button>
+            <button onClick={handleLogout} className="text-xs font-bold text-white/40 px-2 py-1">
+              تسجيل الخروج
+            </button>
+          </div>
         </div>
       </header>
 

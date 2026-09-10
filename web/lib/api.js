@@ -50,6 +50,7 @@ async function request(path, options = {}) {
 export const api = {
   loginUrl: () => `${API_URL}/auth/google/login`,
   setToken,
+  getToken,
   hasToken: () => Boolean(getToken()),
   logout: () => clearToken(),
   me: () => request('/api/me'),
