@@ -1,6 +1,6 @@
 export function formatCurrency(amount) {
   const value = Number.isFinite(amount) ? amount : 0;
-  return `${value.toLocaleString('ar-SA', { maximumFractionDigits: 0 })} ر.س`;
+  return `${value.toLocaleString('en-US', { maximumFractionDigits: 0 })} ر.س`;
 }
 
 export const MONTH_NAMES = [
@@ -10,4 +10,8 @@ export const MONTH_NAMES = [
 
 export function monthLabel(year, month) {
   return `${MONTH_NAMES[month - 1]} ${year}`;
+}
+
+export function formatDate(date) {
+  return new Date(date).toLocaleDateString('ar-SA-u-ca-gregory-nu-latn');
 }

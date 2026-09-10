@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { formatCurrency } from '../lib/format';
+import { formatCurrency, formatDate } from '../lib/format';
 
 export default function RecentActivity({ expenses }) {
   const recent = expenses.slice(0, 6);
@@ -26,7 +26,7 @@ export default function RecentActivity({ expenses }) {
                   {expense.description || expense.category?.name || 'بدون وصف'}
                 </span>
                 <span className="block text-xs text-gray-500">
-                  {expense.category?.name} · {new Date(expense.date).toLocaleDateString('ar-SA-u-ca-gregory')}
+                  {expense.category?.name} · {formatDate(expense.date)}
                 </span>
               </span>
               <span className="text-sm font-semibold text-gray-800 whitespace-nowrap">

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { formatCurrency } from '../lib/format';
+import { formatCurrency, formatDate } from '../lib/format';
 
 export default function ExpenseRow({ expense, onUpdate, onDelete }) {
   const [editing, setEditing] = useState(false);
@@ -58,7 +58,7 @@ export default function ExpenseRow({ expense, onUpdate, onDelete }) {
     <motion.div layout className="flex items-center justify-between px-4 py-3">
       <button className="text-start flex-1" onClick={() => setEditing(true)}>
         <p className="font-medium text-gray-800">{expense.description || 'بدون وصف'}</p>
-        <p className="text-sm text-gray-400">{new Date(expense.date).toLocaleDateString('ar-SA-u-ca-gregory')}</p>
+        <p className="text-sm text-gray-400">{formatDate(expense.date)}</p>
       </button>
       <div className="flex items-center gap-4">
         <button onClick={() => setEditing(true)} className="font-semibold hover:text-primary transition-colors">
