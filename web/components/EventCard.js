@@ -1,14 +1,14 @@
 'use client';
 
 const OWNER_STYLES = {
-  primary: { badge: 'bg-apricot text-black', label: 'لك' },
-  secondary: { badge: 'bg-warmyellow text-black', label: 'لزوجتك' },
+  primary: { badge: 'bg-apricot text-white', label: 'لك' },
+  secondary: { badge: 'bg-warmyellow text-white', label: 'لزوجتك' },
 };
 
 function OwnerBadge({ event }) {
   if (event.isFamilyEvent) {
     return (
-      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-l from-apricot to-warmyellow text-black">
+      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-gradient-to-l from-apricot to-warmyellow text-white">
         لكما معًا
       </span>
     );

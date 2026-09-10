@@ -116,7 +116,7 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
                 type="button"
                 onClick={() => setVisibility('shared')}
                 className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition ${
-                  visibility === 'shared' ? 'bg-apricot border-apricot text-black' : 'border-black/10 text-black/50'
+                  visibility === 'shared' ? 'bg-apricot border-apricot text-white' : 'border-black/10 text-black/50'
                 }`}
               >
                 لكما معًا
@@ -125,7 +125,7 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
                 type="button"
                 onClick={() => setVisibility('mine')}
                 className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition ${
-                  visibility === 'mine' ? 'bg-apricot border-apricot text-black' : 'border-black/10 text-black/50'
+                  visibility === 'mine' ? 'bg-apricot border-apricot text-white' : 'border-black/10 text-black/50'
                 }`}
               >
                 لي وحدي
@@ -138,7 +138,7 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-xl bg-apricot text-black font-bold py-3 shadow-card disabled:opacity-60"
+            className="w-full rounded-xl bg-apricot text-white font-bold py-3 shadow-card disabled:opacity-60"
           >
             {submitting ? 'جارٍ الحفظ…' : 'حفظ في Google Calendar'}
           </button>

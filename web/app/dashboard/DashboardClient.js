@@ -162,7 +162,7 @@ export default function DashboardClient() {
 
       <button
         onClick={() => setFormState('new')}
-        className="fixed bottom-6 inset-x-0 mx-auto w-fit sm:end-6 sm:mx-0 flex items-center gap-2 rounded-full bg-apricot text-black font-bold pl-5 pr-4 py-3.5 shadow-card z-30"
+        className="fixed bottom-6 inset-x-0 mx-auto w-fit sm:end-6 sm:mx-0 flex items-center gap-2 rounded-full bg-apricot text-white font-bold pl-5 pr-4 py-3.5 shadow-card z-30"
       >
         <span className="text-xl leading-none">+</span>
         موعد جديد
