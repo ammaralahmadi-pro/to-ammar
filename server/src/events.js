@@ -13,14 +13,17 @@ function toGoogleEvent({ title, location, notes, startAt, endAt, allDay, familyE
   const endField = allDay
     ? { date: endAt.slice(0, 10) }
     : { dateTime: new Date(endAt).toISOString() };
-  return {
+  const event = {
     summary: title,
     location: location || undefined,
     description: notes || undefined,
     start: timeField,
     end: endField,
-    extendedProperties: { private: { familyEventId } },
   };
+  if (familyEventId) {
+    event.extendedProperties = { private: { familyEventId } };
+  }
+  return event;
 }
 
 async function familyUsers() {
@@ -50,11 +53,13 @@ router.get('/', async (req, res) => {
 
       for (const gEvent of data.items || []) {
         const familyEventId = gEvent.extendedProperties?.private?.familyEventId;
-        const key = familyEventId || `${user.id}:${gEvent.id}`;
+        // مواعيد أُنشئت من الموقع تُعرَّف بـ familyEventId المشترك بين نسخها؛
+        // مواعيد موجودة أصلًا في تقويم Google (خارج التطبيق) تُعرَّف بمعرّف "ext:" حتى تبقى قابلة للتعديل/الحذف
+        const key = familyEventId || `ext:${user.id}:${gEvent.id}`;
         if (merged.has(key)) continue; // نسخة أخرى من نفس الحدث المشترك — تُعرض مرة واحدة
 
         merged.set(key, {
-          id: familyEventId || gEvent.id,
+          id: key,
           isFamilyEvent: Boolean(familyEventId),
           ownerColorTag: user.colorTag,
           ownerName: user.name,
@@ -117,8 +122,34 @@ router.post('/', async (req, res) => {
   }
 });
 
+// موعد موجود أصلًا في تقويم Google (خارج التطبيق) — نسخة واحدة، بلا سجل في قاعدة البيانات
+async function findExternalEventTarget(id) {
+  const match = /^ext:([^:]+):(.+)$/.exec(id);
+  if (!match) return null;
+  const [, userId, googleEventId] = match;
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) return null;
+  return { user, googleEventId };
+}
+
 // PATCH /api/events/:id — يحدّث كل نسخ الحدث في تقاويم Google المرتبطة به
 router.patch('/:id', async (req, res) => {
+  const external = await findExternalEventTarget(req.params.id);
+  if (external) {
+    try {
+      const calendar = await calendarClientForUser(external.user);
+      await calendar.events.patch({
+        calendarId: 'primary',
+        eventId: external.googleEventId,
+        requestBody: toGoogleEvent(req.body),
+      });
+      return res.status(204).end();
+    } catch (err) {
+      console.error('PATCH /api/events (external) failed:', err);
+      return res.status(502).json({ error: 'تعذّر تحديث الموعد في Google Calendar' });
+    }
+  }
+
   const event = await prisma.event.findUnique({
     where: { id: req.params.id },
     include: { copies: { include: { user: true } } },
@@ -158,6 +189,20 @@ router.patch('/:id', async (req, res) => {
 
 // DELETE /api/events/:id — يحذف كل نسخ الحدث من تقاويم Google، ثم السجل نفسه
 router.delete('/:id', async (req, res) => {
+  const external = await findExternalEventTarget(req.params.id);
+  if (external) {
+    try {
+      const calendar = await calendarClientForUser(external.user);
+      await calendar.events.delete({ calendarId: 'primary', eventId: external.googleEventId }).catch((err) => {
+        if (err.code !== 404 && err.code !== 410) throw err;
+      });
+      return res.status(204).end();
+    } catch (err) {
+      console.error('DELETE /api/events (external) failed:', err);
+      return res.status(502).json({ error: 'تعذّر حذف الموعد من Google Calendar' });
+    }
+  }
+
   const event = await prisma.event.findUnique({
     where: { id: req.params.id },
     include: { copies: { include: { user: true } } },
