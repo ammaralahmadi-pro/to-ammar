@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import Shell from '../../components/Shell';
 import MonthNav from '../../components/MonthNav';
 import CategoryCard from '../../components/CategoryCard';
 import SalaryForm from '../../components/SalaryForm';
 import AddExpenseModal from '../../components/AddExpenseModal';
+import AllocationDonut from '../../components/AllocationDonut';
 import { api } from '../../lib/api';
 import { formatCurrency } from '../../lib/format';
 
@@ -46,6 +48,11 @@ export default function DashboardPage() {
     if (authChecked) load();
   }, [authChecked, load]);
 
+  async function handleUpdateCategory(id, updates) {
+    await api.updateCategory(id, updates);
+    await load();
+  }
+
   if (!authChecked || loading || !data) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">جارِ التحميل...</div>
@@ -71,8 +78,13 @@ export default function DashboardPage() {
           <SalaryForm year={period.year} month={period.month} onSaved={load} />
         )
       ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+        <motion.div
+          key={`${period.year}-${period.month}`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
             <div className="bg-surface shadow-card rounded-2xl p-6">
               <p className="text-gray-500 text-sm mb-1">المتبقي من الشهر</p>
               <p className={`font-display font-extrabold text-3xl ${data.totalRemaining < 0 ? 'text-danger' : 'text-gray-900'}`}>
@@ -87,6 +99,9 @@ export default function DashboardPage() {
                 {formatCurrency(savingCategory ? savingCategory.spent : data.totalIncome)}
               </p>
             </div>
+            <div className="bg-surface shadow-card rounded-2xl p-4 flex items-center justify-center">
+              <AllocationDonut categories={data.categories} totalIncome={data.totalIncome} totalSpent={data.totalSpent} />
+            </div>
           </div>
 
           {data.unallocated > 1 && (
@@ -96,23 +111,27 @@ export default function DashboardPage() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data.categories.map((category) => (
-              <CategoryCard key={category.id} category={category} />
-            ))}
+            <AnimatePresence>
+              {data.categories.map((category) => (
+                <CategoryCard key={category.id} category={category} onUpdate={handleUpdateCategory} />
+              ))}
+            </AnimatePresence>
           </div>
-        </>
+        </motion.div>
       )}
 
-      {showAddExpense && (
-        <AddExpenseModal
-          categories={categories}
-          onClose={() => setShowAddExpense(false)}
-          onSaved={() => {
-            setShowAddExpense(false);
-            load();
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {showAddExpense && (
+          <AddExpenseModal
+            categories={categories}
+            onClose={() => setShowAddExpense(false)}
+            onSaved={() => {
+              setShowAddExpense(false);
+              load();
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {categories.length > 0 && (
         <button

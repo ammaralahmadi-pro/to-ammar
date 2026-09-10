@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 import { monthLabel } from '../lib/format';
 
@@ -30,7 +31,12 @@ export default function SalaryForm({ year, month, initialAmount, initialExtra, o
   }
 
   return (
-    <div className="bg-surface shadow-card rounded-2xl p-6 max-w-md">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-surface shadow-card rounded-2xl p-6 max-w-md"
+    >
       <h2 className="font-display font-bold text-lg mb-1">أدخل راتبك لشهر {monthLabel(year, month)}</h2>
       <p className="text-gray-500 text-sm mb-4">سيتم توزيعه تلقائيًا على فئاتك المحددة.</p>
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -66,6 +72,6 @@ export default function SalaryForm({ year, month, initialAmount, initialExtra, o
           {loading ? 'جارِ الحفظ...' : 'حفظ وتوزيع'}
         </button>
       </form>
-    </div>
+    </motion.div>
   );
 }

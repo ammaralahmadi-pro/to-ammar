@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { api } from '../../lib/api';
 
 const ERROR_MESSAGES = {
@@ -16,7 +17,12 @@ function LoginContent() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted px-4">
-      <div className="w-full max-w-sm bg-surface shadow-card rounded-2xl p-8 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.4, ease: 'easeOut' }}
+        className="w-full max-w-sm bg-surface shadow-card rounded-2xl p-8 text-center"
+      >
         <h1 className="font-display font-extrabold text-2xl text-primary mb-1">توزيع الراتب</h1>
         <p className="text-gray-500 text-sm mb-8">سجّل الدخول لمتابعة ميزانيتك الشهرية</p>
 
@@ -38,7 +44,7 @@ function LoginContent() {
           </svg>
           تسجيل الدخول عبر Google
         </a>
-      </div>
+      </motion.div>
     </div>
   );
 }

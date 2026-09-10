@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 
 export default function AddExpenseModal({ categories, defaultCategoryId, onClose, onSaved }) {
@@ -31,8 +32,21 @@ export default function AddExpenseModal({ categories, defaultCategoryId, onClose
   }
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50">
-      <div className="bg-surface rounded-2xl shadow-card w-full max-w-sm p-6">
+    <motion.div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center px-4 z-50"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        className="bg-surface rounded-2xl shadow-card w-full max-w-sm p-6"
+        initial={{ opacity: 0, scale: 0.95, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <h2 className="font-display font-bold text-lg mb-4">إضافة مصروف</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -96,7 +110,7 @@ export default function AddExpenseModal({ categories, defaultCategoryId, onClose
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

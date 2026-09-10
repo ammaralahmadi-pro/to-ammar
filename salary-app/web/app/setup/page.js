@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { AnimatePresence, motion } from 'framer-motion';
 import Shell from '../../components/Shell';
 import { api } from '../../lib/api';
 
@@ -93,20 +94,30 @@ export default function SetupPage() {
             <p className="text-gray-500 text-sm">لا توجد فئات بعد. أضف أول فئة من النموذج.</p>
           ) : (
             <ul className="divide-y divide-gray-100">
-              {categories.map((c) => (
-                <li key={c.id} className="py-3 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-800">{c.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {c.type === 'percentage' ? `${c.value}% من الراتب` : `${c.value} ر.س ثابت`}
-                    </p>
-                  </div>
-                  <div className="flex gap-3 text-sm">
-                    <button onClick={() => startEdit(c)} className="text-primary font-medium">تعديل</button>
-                    <button onClick={() => handleDelete(c.id)} className="text-danger font-medium">حذف</button>
-                  </div>
-                </li>
-              ))}
+              <AnimatePresence>
+                {categories.map((c) => (
+                  <motion.li
+                    key={c.id}
+                    layout
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 12 }}
+                    transition={{ duration: 0.2 }}
+                    className="py-3 flex items-center justify-between"
+                  >
+                    <div>
+                      <p className="font-medium text-gray-800">{c.name}</p>
+                      <p className="text-sm text-gray-500">
+                        {c.type === 'percentage' ? `${c.value}% من الراتب` : `${c.value} ر.س ثابت`}
+                      </p>
+                    </div>
+                    <div className="flex gap-3 text-sm">
+                      <button onClick={() => startEdit(c)} className="text-primary font-medium">تعديل</button>
+                      <button onClick={() => handleDelete(c.id)} className="text-danger font-medium">حذف</button>
+                    </div>
+                  </motion.li>
+                ))}
+              </AnimatePresence>
             </ul>
           )}
         </div>

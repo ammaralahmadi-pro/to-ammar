@@ -70,6 +70,7 @@ export const api = {
   listExpenses: (year, month, categoryId) =>
     request(`/expenses?year=${year}&month=${month}${categoryId ? `&categoryId=${categoryId}` : ''}`),
   createExpense: (data) => request('/expenses', { method: 'POST', body: JSON.stringify(data) }),
+  updateExpense: (id, data) => request(`/expenses/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteExpense: (id) => request(`/expenses/${id}`, { method: 'DELETE' }),
 
   getDashboard: (year, month) => request(`/dashboard/${year}/${month}`),
