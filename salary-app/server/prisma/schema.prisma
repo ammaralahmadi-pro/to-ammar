@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  currency     String   @default("SAR")
+  createdAt    DateTime @default(now())
+
+  categories     Category[]
+  monthlySalaries MonthlySalary[]
+  expenses       Expense[]
+}
+
+// النوع: "percentage" نسبة من الراتب، أو "fixed" مبلغ ثابت
+model Category {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  type      String   @default("percentage")
+  value     Float
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  expenses Expense[]
+
+  @@index([userId])
+}
+
+model MonthlySalary {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  month       Int
+  year        Int
+  amount      Float
+  extraIncome Float    @default(0)
+  createdAt   DateTime @default(now())
+
+  @@unique([userId, year, month])
+}
+
+model Expense {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  month       Int
+  year        Int
+  amount      Float
+  description String?
+  date        DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  @@index([userId, year, month])
+  @@index([categoryId])
+}
