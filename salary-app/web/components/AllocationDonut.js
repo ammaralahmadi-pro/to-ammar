@@ -3,7 +3,11 @@
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { formatCurrency } from '../lib/format';
 
-const STATUS_COLORS = { ok: '#16a34a', warning: '#f59e0b', over: '#dc2626' };
+const GRADIENTS = {
+  ok: ['#4ade80', '#16a34a'],
+  warning: ['#fbbf24', '#f59e0b'],
+  over: ['#f87171', '#dc2626'],
+};
 
 export default function AllocationDonut({ categories, totalIncome, totalSpent }) {
   const data = categories
@@ -18,6 +22,14 @@ export default function AllocationDonut({ categories, totalIncome, totalSpent })
     <div className="relative w-full h-56 sm:h-64">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
+          <defs>
+            {Object.entries(GRADIENTS).map(([status, [from, to]]) => (
+              <linearGradient key={status} id={`donut-${status}`} x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor={from} />
+                <stop offset="100%" stopColor={to} />
+              </linearGradient>
+            ))}
+          </defs>
           <Pie
             data={data}
             dataKey="value"
@@ -29,7 +41,7 @@ export default function AllocationDonut({ categories, totalIncome, totalSpent })
             animationBegin={100}
           >
             {data.map((entry, i) => (
-              <Cell key={i} fill={STATUS_COLORS[entry.status] || STATUS_COLORS.ok} stroke="none" />
+              <Cell key={i} fill={`url(#donut-${entry.status || 'ok'})`} stroke="none" />
             ))}
           </Pie>
           <Tooltip

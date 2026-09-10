@@ -12,6 +12,7 @@ import AllocationDonut from '../../components/AllocationDonut';
 import AlertsPanel from '../../components/AlertsPanel';
 import RecentActivity from '../../components/RecentActivity';
 import StatStrip from '../../components/StatStrip';
+import ExpenseLog from '../../components/ExpenseLog';
 import { api } from '../../lib/api';
 import { formatCurrency } from '../../lib/format';
 
@@ -56,6 +57,17 @@ export default function DashboardPage() {
 
   async function handleUpdateCategory(id, updates) {
     await api.updateCategory(id, updates);
+    await load();
+  }
+
+  async function handleUpdateExpense(id, updates) {
+    await api.updateExpense(id, updates);
+    await load();
+  }
+
+  async function handleDeleteExpense(id) {
+    if (!confirm('حذف هذا المصروف؟')) return;
+    await api.deleteExpense(id);
     await load();
   }
 
@@ -124,13 +136,20 @@ export default function DashboardPage() {
           </div>
 
           <h2 className="font-display font-bold text-lg mb-3">تفصيل الفئات</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <AnimatePresence>
               {data.categories.map((category) => (
                 <CategoryCard key={category.id} category={category} onUpdate={handleUpdateCategory} />
               ))}
             </AnimatePresence>
           </div>
+
+          <ExpenseLog
+            expenses={expenses}
+            categories={categories}
+            onUpdate={handleUpdateExpense}
+            onDelete={handleDeleteExpense}
+          />
         </motion.div>
       )}
 

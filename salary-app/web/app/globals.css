@@ -8,22 +8,21 @@ html {
 
 body {
   background:
-    radial-gradient(circle at 15% -10%, rgba(59, 130, 246, 0.16), transparent 45%),
-    radial-gradient(circle at 90% 0%, rgba(34, 211, 238, 0.08), transparent 40%),
-    #05070d;
+    radial-gradient(circle at 15% -10%, rgba(139, 92, 246, 0.08), transparent 45%),
+    #030406;
   min-height: 100vh;
 }
 
 input,
 select,
 textarea {
-  background-color: #171c33;
-  color: #f4f5fa;
+  background-color: #151926;
+  color: #f6f6fa;
 }
 
 input::placeholder,
 textarea::placeholder {
-  color: #6b7290;
+  color: #666b82;
 }
 
 ::-webkit-scrollbar {
@@ -36,6 +35,6 @@ textarea::placeholder {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #282e49;
+  background: #252a3b;
   border-radius: 999px;
 }
