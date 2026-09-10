@@ -16,35 +16,65 @@ function LoginContent() {
   const error = params.get('error');
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-      <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center text-center mb-10">
-          <div className="w-16 h-16 rounded-2xl bg-apricot flex items-center justify-center shadow-card mb-5">
-            <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="5" width="18" height="16" rx="3" stroke="#fff" strokeWidth="1.6" />
-              <path d="M3 9.5H21" stroke="#fff" strokeWidth="1.6" />
-              <path d="M7.5 3V6.5M16.5 3V6.5" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" />
-              <circle cx="8" cy="13.5" r="1.1" fill="#fff" />
-              <circle cx="12" cy="13.5" r="1.1" fill="#fff" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-extrabold tracking-tight">مواعيدنا</h1>
-          <p className="mt-3 text-black/60 leading-relaxed">
-            تقويم عائلي واحد، يتزامن مباشرة مع تقويم Google الخاص بكل واحد منكما.
-          </p>
-        </div>
+    <main dir="rtl" className="min-h-screen flex flex-col bg-[#0e1a3a]">
+      {/* ===== القسم العلوي: خلفية داكنة مع رسمة توضيحية ===== */}
+      <div className="relative flex-1 min-h-[300px] flex items-center justify-center overflow-hidden">
+        {/* نجوم زخرفية */}
+        <span className="absolute top-[18%] left-[20%] w-1.5 h-1.5 rounded-full bg-white/50" />
+        <span className="absolute top-[30%] left-[70%] w-1 h-1 rounded-full bg-white/40" />
+        <span className="absolute top-[60%] left-[15%] w-1 h-1 rounded-full bg-white/40" />
+        <span className="absolute top-[15%] left-[55%] w-1.5 h-1.5 rounded-full bg-white/30" />
+        <span className="absolute top-[70%] left-[78%] w-1.5 h-1.5 rounded-full bg-white/40" />
+
+        {/* توهّج خلفي */}
+        <div className="absolute w-64 h-64 rounded-full bg-apricot/25 blur-3xl" />
+
+        {/* حلقة الإطلاق + خطوط إشعاع */}
+        <svg width="220" height="180" viewBox="0 0 220 180" fill="none" className="relative">
+          <ellipse cx="110" cy="150" rx="70" ry="14" fill="#12224f" />
+          {[...Array(9)].map((_, i) => {
+            const angle = (-70 + i * 17.5) * (Math.PI / 180);
+            const x1 = 110 + Math.sin(angle) * 46;
+            const y1 = 150 - Math.cos(angle) * 46;
+            const x2 = 110 + Math.sin(angle) * 78;
+            const y2 = 150 - Math.cos(angle) * 78;
+            return (
+              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#f6c453" strokeWidth="3" strokeLinecap="round" />
+            );
+          })}
+          <circle cx="110" cy="150" r="44" fill="#f6c453" />
+          {/* شخصية مبسّطة تنطلق للأعلى */}
+          <g>
+            <circle cx="110" cy="88" r="15" fill="#ffd9a8" />
+            <path d="M96 108c2-9 8-14 14-14s12 5 14 14l4 26c1 6-3 11-9 11H101c-6 0-10-5-9-11z" fill="#0a6bf5" />
+            <path d="M100 142l-9 22" stroke="#12224f" strokeWidth="6" strokeLinecap="round" />
+            <path d="M120 142l9 22" stroke="#12224f" strokeWidth="6" strokeLinecap="round" />
+            <path d="M97 112l-16 10" stroke="#ffd9a8" strokeWidth="6" strokeLinecap="round" />
+            <path d="M123 112l16 10" stroke="#ffd9a8" strokeWidth="6" strokeLinecap="round" />
+          </g>
+        </svg>
+      </div>
+
+      {/* ===== القسم السفلي: بطاقة داكنة ===== */}
+      <div className="relative bg-[#12142b] rounded-t-[32px] px-6 pt-9 pb-9 flex flex-col items-center text-center shadow-[0_-20px_40px_-20px_rgba(0,0,0,.45)]">
+        <h1 className="text-2xl font-extrabold text-white leading-snug">
+          لنبدأ رحلتكما<br />معًا
+        </h1>
+        <p className="mt-3 text-[13px] leading-relaxed text-white/50 max-w-xs">
+          تقويم عائلي واحد يتزامن مباشرة مع Google Calendar — أي موعد تضيفه يظهر عند الطرف الثاني فورًا.
+        </p>
 
         {error && (
-          <div className="mb-6 rounded-xl bg-glaze border border-warmyellow/40 px-4 py-3 text-sm text-black/80">
+          <div className="mt-5 w-full rounded-xl bg-white/10 border border-white/10 px-4 py-3 text-sm text-white/80">
             {ERROR_MESSAGES[error] || 'حدث خطأ غير متوقع.'}
           </div>
         )}
 
         <a
           href={api.loginUrl()}
-          className="flex items-center justify-center gap-3 w-full rounded-xl bg-apricot text-white font-bold py-3.5 shadow-card transition hover:brightness-95 active:scale-[.98]"
+          className="mt-7 flex items-center justify-center gap-2.5 w-full max-w-xs rounded-full bg-[#ff6b57] text-white font-extrabold py-4 shadow-[0_16px_28px_-12px_rgba(255,107,87,.55)] transition hover:brightness-95 active:scale-[.98]"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24">
+          <svg width="18" height="18" viewBox="0 0 24 24">
             <path fill="#fff" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.07 5.07 0 0 1-2.2 3.32v2.77h3.56c2.08-1.92 3.28-4.74 3.28-8.1z" opacity=".95" />
             <path fill="#fff" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.56-2.77c-.99.66-2.25 1.06-3.72 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.85A11 11 0 0 0 12 23z" opacity=".8" />
             <path fill="#fff" d="M5.84 14.1A6.6 6.6 0 0 1 5.5 12c0-.73.13-1.44.34-2.1V7.05H2.18A11 11 0 0 0 1 12c0 1.77.43 3.45 1.18 4.95l3.66-2.85z" opacity=".65" />
@@ -53,7 +83,7 @@ function LoginContent() {
           تسجيل الدخول بحساب Google
         </a>
 
-        <p className="mt-5 text-center text-xs text-black/40 leading-relaxed">
+        <p className="mt-5 text-[11px] leading-relaxed text-white/30 max-w-xs">
           الدخول متاح فقط للبريدين الإلكترونيين المسجَّلين لهذه العائلة.
           <br />نطلب صلاحية القراءة والكتابة على تقويمك في Google Calendar فقط.
         </p>
