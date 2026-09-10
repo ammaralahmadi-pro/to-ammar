@@ -1,6 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const cookieParser = require('cookie-parser');
 const { port, frontendUrl } = require('./env');
 
 const authRouter = require('./auth');
@@ -11,9 +10,8 @@ const dashboardRouter = require('./dashboard');
 
 const app = express();
 
-app.use(cors({ origin: frontendUrl, credentials: true }));
+app.use(cors({ origin: frontendUrl }));
 app.use(express.json());
-app.use(cookieParser());
 
 app.get('/health', (req, res) => res.json({ ok: true }));
 

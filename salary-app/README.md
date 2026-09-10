@@ -23,15 +23,18 @@ salary-app/web/      واجهة Next.js 14 + Tailwind CSS — RTL بالكامل
 ```bash
 cd salary-app/server
 cp .env.example .env
-# املأ DATABASE_URL (رابط PostgreSQL) وولّد JWT_SECRET:
+# املأ DATABASE_URL (رابط PostgreSQL)، وولّد JWT_SECRET:
 openssl rand -hex 32
+# واملأ بيانات Google OAuth (نفس مشروع Google Cloud المستخدم لتطبيق "مواعيدنا" يصلح،
+# فقط أضف رابط الاستدعاء الجديد أدناه إلى Authorized redirect URIs) و ALLOWED_EMAILS
 
 npm install
 npx prisma migrate dev --name init
 npm run dev
 ```
 
-يعمل الخادم على `http://localhost:4100`.
+يعمل الخادم على `http://localhost:4100`، ورابط الاستدعاء المحلي هو
+`http://localhost:4100/auth/google/callback` (أضِفه في Google Cloud Console).
 
 ### 2) الواجهة
 
@@ -42,8 +45,8 @@ npm install
 npm run dev
 ```
 
-افتح `http://localhost:3100`، أنشئ حسابًا جديدًا (بريد إلكتروني + كلمة مرور)، ثم أدخل راتبك
-الأول من لوحة التحكم.
+افتح `http://localhost:3100` وسجّل الدخول عبر Google — يجب أن يكون بريدك ضمن
+`ALLOWED_EMAILS` في إعدادات الخادم، وإلا سيُرفض الدخول.
 
 ## النشر (بنفس طريقة نشر "مواعيدنا" — مستودع واحد، مشروعان منفصلان)
 
@@ -62,8 +65,12 @@ npm run dev
    "مواعيدنا" في نفس المستودع).
 3. Build Command: `npm install && npm run build` — Start Command: `npm start`.
 4. أضف متغيرات البيئة: `DATABASE_URL`، `JWT_SECRET` (أنشئه بـ `openssl rand -hex 32`)،
-   `FRONTEND_URL` (رابط الواجهة بعد نشرها في الخطوة التالية)، و`NODE_ENV=production`.
-5. بعد أول نشر ناجح انسخ رابط الخادم (مثل `https://salary-app-server.onrender.com`).
+   `FRONTEND_URL` (رابط الواجهة بعد نشرها في الخطوة التالية)، `NODE_ENV=production`،
+   `GOOGLE_CLIENT_ID`، `GOOGLE_CLIENT_SECRET`، `GOOGLE_REDIRECT_URI` (= رابط الخادم +
+   `/auth/google/callback`)، و`ALLOWED_EMAILS` (البريد أو البُرد المسموح لها بالدخول).
+5. أضف رابط الاستدعاء (`GOOGLE_REDIRECT_URI` أعلاه) إلى **Authorized redirect URIs** في
+   إعدادات مشروع Google Cloud نفسه.
+6. بعد أول نشر ناجح انسخ رابط الخادم (مثل `https://salary-app-server.onrender.com`).
 
 ### 3) الواجهة — Vercel
 
@@ -79,7 +86,8 @@ npm run dev
 
 ## نموذج البيانات (Prisma)
 
-- `User`: id, name, email, passwordHash, currency, createdAt
+- `User`: id, name, email, googleId, pictureUrl, currency, createdAt — الدخول عبر Google
+  OAuth فقط، مقيّد بقائمة `ALLOWED_EMAILS` في الخادم
 - `Category`: id, userId, name, type(percentage/fixed), value, sortOrder — تُنشأ فئات
   افتراضية تلقائيًا عند إنشاء الحساب، وقابلة للتعديل/الحذف/الإضافة بالكامل من `/setup`.
 - `MonthlySalary`: id, userId, month, year, amount, extraIncome (فريد لكل مستخدم/شهر/سنة)

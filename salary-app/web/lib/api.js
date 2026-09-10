@@ -1,14 +1,44 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4100';
+const TOKEN_KEY = 'salary_app_token';
+
+function getToken() {
+  try {
+    return localStorage.getItem(TOKEN_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function setToken(token) {
+  try {
+    localStorage.setItem(TOKEN_KEY, token);
+  } catch {
+    /* لو المتصفح يحجب localStorage، الجلسة ما راح تُحفظ بين الزيارات */
+  }
+}
+
+function clearToken() {
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {}
+}
 
 async function request(path, options = {}) {
+  const token = getToken();
   const res = await fetch(`${API_URL}${path}`, {
-    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
     ...options,
   });
+  if (res.status === 401) {
+    clearToken();
+    const err = new Error('not_authenticated');
+    err.status = 401;
+    throw err;
+  }
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
     const err = new Error(body.error || `request_failed_${res.status}`);
@@ -20,9 +50,13 @@ async function request(path, options = {}) {
 }
 
 export const api = {
-  register: (data) => request('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
-  login: (data) => request('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
-  logout: () => request('/auth/logout', { method: 'POST' }),
+  loginUrl: () => `${API_URL}/auth/google/login`,
+  setToken,
+  hasToken: () => Boolean(getToken()),
+  logout: () => {
+    clearToken();
+    return request('/auth/logout', { method: 'POST' }).catch(() => {});
+  },
   me: () => request('/auth/me'),
 
   listCategories: () => request('/categories'),

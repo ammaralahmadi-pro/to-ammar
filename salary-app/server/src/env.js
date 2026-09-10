@@ -12,4 +12,13 @@ module.exports = {
   frontendUrl: process.env.FRONTEND_URL || 'http://localhost:3100',
   databaseUrl: required('DATABASE_URL'),
   jwtSecret: required('JWT_SECRET'),
+  google: {
+    clientId: required('GOOGLE_CLIENT_ID'),
+    clientSecret: required('GOOGLE_CLIENT_SECRET'),
+    redirectUri: required('GOOGLE_REDIRECT_URI'),
+  },
+  allowedEmails: required('ALLOWED_EMAILS')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean),
 };

@@ -8,12 +8,13 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  currency     String   @default("SAR")
-  createdAt    DateTime @default(now())
+  id         String   @id @default(cuid())
+  name       String
+  email      String   @unique
+  googleId   String   @unique
+  pictureUrl String?
+  currency   String   @default("SAR")
+  createdAt  DateTime @default(now())
 
   categories     Category[]
   monthlySalaries MonthlySalary[]

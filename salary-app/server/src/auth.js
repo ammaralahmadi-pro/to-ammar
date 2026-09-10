@@ -1,71 +1,71 @@
 const express = require('express');
-const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const env = require('./env');
 const prisma = require('./prisma');
-const { jwtSecret, nodeEnv } = require('./env');
 const { requireAuth } = require('./middleware');
+const { buildAuthUrl, exchangeCodeForProfile } = require('./googleClient');
 const defaultCategories = require('./defaultCategories');
 
 const router = express.Router();
 
-const cookieOptions = {
-  httpOnly: true,
-  secure: nodeEnv === 'production',
-  sameSite: 'lax',
-  maxAge: 30 * 24 * 60 * 60 * 1000,
-};
+// تخزين مؤقت لقيم state (حماية CSRF لتدفّق OAuth) — ذاكرة العملية كافية لتطبيق فردي
+const pendingStates = new Set();
 
 function publicUser(user) {
-  return { id: user.id, name: user.name, email: user.email, currency: user.currency };
+  return { id: user.id, name: user.name, email: user.email, pictureUrl: user.pictureUrl, currency: user.currency };
 }
 
-router.post('/register', async (req, res) => {
-  const { name, email, password } = req.body || {};
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: 'الاسم والبريد وكلمة المرور مطلوبة' });
-  }
-  if (password.length < 6) {
-    return res.status(400).json({ error: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' });
-  }
-
-  const existing = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-  if (existing) return res.status(409).json({ error: 'البريد الإلكتروني مستخدم مسبقًا' });
-
-  const passwordHash = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({
-    data: {
-      name,
-      email: email.toLowerCase(),
-      passwordHash,
-      categories: {
-        create: defaultCategories.map((c, i) => ({ ...c, sortOrder: i })),
-      },
-    },
-  });
-
-  const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '30d' });
-  res.cookie('token', token, cookieOptions);
-  res.status(201).json({ user: publicUser(user) });
+router.get('/google/login', (req, res) => {
+  const state = crypto.randomBytes(16).toString('hex');
+  pendingStates.add(state);
+  setTimeout(() => pendingStates.delete(state), 5 * 60_000);
+  res.redirect(buildAuthUrl(state));
 });
 
-router.post('/login', async (req, res) => {
-  const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: 'البريد وكلمة المرور مطلوبان' });
+router.get('/google/callback', async (req, res) => {
+  const { code, state, error } = req.query;
 
-  const user = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
-  if (!user) return res.status(401).json({ error: 'بيانات الدخول غير صحيحة' });
+  if (error || !code || !state || !pendingStates.has(state)) {
+    return res.redirect(`${env.frontendUrl}/login?error=auth_failed`);
+  }
+  pendingStates.delete(state);
 
-  const valid = await bcrypt.compare(password, user.passwordHash);
-  if (!valid) return res.status(401).json({ error: 'بيانات الدخول غير صحيحة' });
+  try {
+    const profile = await exchangeCodeForProfile(code);
 
-  const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '30d' });
-  res.cookie('token', token, cookieOptions);
-  res.json({ user: publicUser(user) });
+    if (!env.allowedEmails.includes(profile.email)) {
+      return res.redirect(`${env.frontendUrl}/login?error=not_allowed`);
+    }
+
+    const existing = await prisma.user.findUnique({ where: { email: profile.email } });
+    const user = existing
+      ? await prisma.user.update({
+          where: { id: existing.id },
+          data: { name: profile.name, pictureUrl: profile.pictureUrl, googleId: profile.googleId },
+        })
+      : await prisma.user.create({
+          data: {
+            email: profile.email,
+            name: profile.name,
+            pictureUrl: profile.pictureUrl,
+            googleId: profile.googleId,
+            categories: { create: defaultCategories.map((c, i) => ({ ...c, sortOrder: i })) },
+          },
+        });
+
+    const sessionToken = jwt.sign({ userId: user.id }, env.jwtSecret, { expiresIn: '30d' });
+    // نمرّر الجلسة كتوكن في الرابط بدل كوكي — يتفادى قيود كوكيز الطرف الثالث
+    // بين نطاق الواجهة (Vercel) ونطاق الخادم (Railway)
+    res.redirect(`${env.frontendUrl}/auth/callback?token=${sessionToken}`);
+  } catch (err) {
+    console.error('Google OAuth callback failed:', err);
+    res.redirect(`${env.frontendUrl}/login?error=server_error`);
+  }
 });
 
 router.post('/logout', (req, res) => {
-  res.clearCookie('token', cookieOptions);
-  res.json({ ok: true });
+  res.status(204).end();
 });
 
 router.get('/me', requireAuth, async (req, res) => {
