@@ -132,10 +132,68 @@ async function findExternalEventTarget(id) {
   return { user, googleEventId };
 }
 
-// PATCH /api/events/:id — يحدّث كل نسخ الحدث في تقاويم Google المرتبطة به
+// يحوّل موعدًا خارجيًا (لطرف واحد) إلى موعد مشترك: يعيد استخدام نسخة المالك الحالية
+// في Google، وينشئ نسخة جديدة لبقية أفراد العائلة
+async function promoteExternalToFamilyEvent({ ownerUser, ownerGoogleEventId, fields }) {
+  const users = await familyUsers();
+  const event = await prisma.event.create({
+    data: {
+      title: fields.title,
+      location: fields.location || null,
+      notes: fields.notes || null,
+      startAt: new Date(fields.startAt),
+      endAt: new Date(fields.endAt),
+      allDay: Boolean(fields.allDay),
+      visibility: 'shared',
+      ownerId: ownerUser.id,
+    },
+  });
+
+  for (const user of users) {
+    const calendar = await calendarClientForUser(user);
+    if (user.id === ownerUser.id) {
+      await calendar.events.patch({
+        calendarId: 'primary',
+        eventId: ownerGoogleEventId,
+        requestBody: toGoogleEvent({ ...fields, familyEventId: event.id }),
+      });
+      await prisma.eventCopy.create({
+        data: { eventId: event.id, userId: user.id, googleEventId: ownerGoogleEventId },
+      });
+    } else {
+      const { data } = await calendar.events.insert({
+        calendarId: 'primary',
+        requestBody: toGoogleEvent({ ...fields, familyEventId: event.id }),
+      });
+      await prisma.eventCopy.create({
+        data: { eventId: event.id, userId: user.id, googleEventId: data.id },
+      });
+    }
+  }
+
+  return event;
+}
+
+// PATCH /api/events/:id — يحدّث كل نسخ الحدث في تقاويم Google المرتبطة به،
+// ويحوّل نوع الموعد (لي وحدي ⇄ لكما معًا) لو تغيّر
 router.patch('/:id', async (req, res) => {
+  const { visibility } = req.body;
   const external = await findExternalEventTarget(req.params.id);
+
   if (external) {
+    if (visibility === 'shared') {
+      try {
+        const event = await promoteExternalToFamilyEvent({
+          ownerUser: external.user,
+          ownerGoogleEventId: external.googleEventId,
+          fields: req.body,
+        });
+        return res.status(200).json({ id: event.id });
+      } catch (err) {
+        console.error('PATCH /api/events (promote) failed:', err);
+        return res.status(502).json({ error: 'تعذّر تحويل الموعد إلى مشترك' });
+      }
+    }
     try {
       const calendar = await calendarClientForUser(external.user);
       await calendar.events.patch({
@@ -160,8 +218,42 @@ router.patch('/:id', async (req, res) => {
   if (req.body.startAt) patch.startAt = req.body.startAt;
   if (req.body.endAt) patch.endAt = req.body.endAt;
 
+  const wantsShared = visibility === 'shared' && event.visibility !== 'shared';
+  const wantsMine = visibility === 'mine' && event.visibility !== 'mine';
+
   try {
-    for (const copy of event.copies) {
+    if (wantsShared) {
+      const users = await familyUsers();
+      const existingUserIds = new Set(event.copies.map((c) => c.userId));
+      for (const user of users) {
+        if (existingUserIds.has(user.id)) continue;
+        const calendar = await calendarClientForUser(user);
+        const { data } = await calendar.events.insert({
+          calendarId: 'primary',
+          requestBody: toGoogleEvent({ ...patch, familyEventId: event.id }),
+        });
+        await prisma.eventCopy.create({
+          data: { eventId: event.id, userId: user.id, googleEventId: data.id },
+        });
+      }
+    }
+
+    if (wantsMine) {
+      for (const copy of event.copies) {
+        if (copy.userId === event.ownerId) continue;
+        const calendar = await calendarClientForUser(copy.user);
+        await calendar.events.delete({ calendarId: copy.googleCalendarId, eventId: copy.googleEventId }).catch((err) => {
+          if (err.code !== 404 && err.code !== 410) throw err;
+        });
+        await prisma.eventCopy.delete({ where: { id: copy.id } });
+      }
+    }
+
+    const currentCopies = wantsShared || wantsMine
+      ? await prisma.eventCopy.findMany({ where: { eventId: event.id }, include: { user: true } })
+      : event.copies;
+
+    for (const copy of currentCopies) {
       const calendar = await calendarClientForUser(copy.user);
       await calendar.events.patch({
         calendarId: copy.googleCalendarId,
@@ -169,6 +261,7 @@ router.patch('/:id', async (req, res) => {
         requestBody: toGoogleEvent({ ...patch, familyEventId: event.id }),
       });
     }
+
     await prisma.event.update({
       where: { id: event.id },
       data: {
@@ -178,6 +271,7 @@ router.patch('/:id', async (req, res) => {
         startAt: new Date(patch.startAt),
         endAt: new Date(patch.endAt),
         allDay: Boolean(patch.allDay),
+        visibility: visibility || event.visibility,
       },
     });
     res.status(204).end();

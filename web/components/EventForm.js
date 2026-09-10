@@ -114,9 +114,8 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
             <div className="flex gap-2">
               <button
                 type="button"
-                disabled={Boolean(initial)}
                 onClick={() => setVisibility('shared')}
-                className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition disabled:opacity-60 ${
+                className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition ${
                   visibility === 'shared' ? 'bg-apricot border-apricot text-black' : 'border-black/10 text-black/50'
                 }`}
               >
@@ -124,20 +123,14 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
               </button>
               <button
                 type="button"
-                disabled={Boolean(initial)}
                 onClick={() => setVisibility('mine')}
-                className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition disabled:opacity-60 ${
+                className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition ${
                   visibility === 'mine' ? 'bg-apricot border-apricot text-black' : 'border-black/10 text-black/50'
                 }`}
               >
                 لي وحدي
               </button>
             </div>
-            {initial && (
-              <span className="text-[11px] text-black/40">
-                لا يمكن تغيير هذا بعد الإنشاء — احذف الموعد وأضفه من جديد لو احتجت تبدّله.
-              </span>
-            )}
           </div>
         </div>
 
