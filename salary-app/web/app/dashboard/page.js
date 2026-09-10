@@ -9,6 +9,9 @@ import CategoryCard from '../../components/CategoryCard';
 import SalaryForm from '../../components/SalaryForm';
 import AddExpenseModal from '../../components/AddExpenseModal';
 import AllocationDonut from '../../components/AllocationDonut';
+import AlertsPanel from '../../components/AlertsPanel';
+import RecentActivity from '../../components/RecentActivity';
+import StatStrip from '../../components/StatStrip';
 import { api } from '../../lib/api';
 import { formatCurrency } from '../../lib/format';
 
@@ -22,18 +25,21 @@ export default function DashboardPage() {
   const [period, setPeriod] = useState(currentPeriod);
   const [data, setData] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [dashboard, cats] = await Promise.all([
+    const [dashboard, cats, expensesRes] = await Promise.all([
       api.getDashboard(period.year, period.month),
       api.listCategories(),
+      api.listExpenses(period.year, period.month),
     ]);
     setData(dashboard);
     setCategories(cats.categories);
+    setExpenses(expensesRes.expenses);
     setLoading(false);
   }, [period]);
 
@@ -62,6 +68,20 @@ export default function DashboardPage() {
   const savingCategory = data.categories.find((c) => c.name.includes('ادخار'));
   const deficit = data.totalRemaining < 0 ? Math.abs(data.totalRemaining) : 0;
 
+  const stats = [
+    {
+      label: 'المتبقي من الشهر',
+      value: formatCurrency(data.totalRemaining),
+      color: data.totalRemaining < 0 ? 'text-danger' : 'text-gray-900',
+    },
+    { label: 'إجمالي الدخل', value: formatCurrency(data.totalIncome), color: 'text-gray-900' },
+    ...(savingCategory
+      ? [{ label: 'الادخار الفعلي', value: formatCurrency(savingCategory.spent), color: 'text-success' }]
+      : []),
+    { label: 'عدد الفئات', value: data.categories.length, color: 'text-gray-900' },
+    ...(deficit > 0 ? [{ label: 'عجز الشهر', value: formatCurrency(deficit), color: 'text-danger' }] : []),
+  ];
+
   return (
     <Shell onAddExpense={categories.length ? () => setShowAddExpense(true) : undefined}>
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -85,45 +105,9 @@ export default function DashboardPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-            <div className="bg-surface shadow-card rounded-2xl p-6">
-              <p className="text-gray-500 text-sm mb-1">المتبقي من الشهر</p>
-              <p className={`font-display font-extrabold text-3xl ${data.totalRemaining < 0 ? 'text-danger' : 'text-gray-900'}`}>
-                {formatCurrency(data.totalRemaining)}
-              </p>
-            </div>
-            <div className="bg-surface shadow-card rounded-2xl p-6">
-              <p className="text-gray-500 text-sm mb-1">
-                {savingCategory ? 'الادخار الفعلي هذا الشهر' : 'إجمالي الدخل'}
-              </p>
-              <p className="font-display font-extrabold text-3xl text-success">
-                {formatCurrency(savingCategory ? savingCategory.spent : data.totalIncome)}
-              </p>
-            </div>
-            <div className="bg-surface shadow-card rounded-2xl p-4 flex items-center justify-center">
-              <AllocationDonut categories={data.categories} totalIncome={data.totalIncome} totalSpent={data.totalSpent} />
-            </div>
+          <div className="mb-6">
+            <StatStrip items={stats} />
           </div>
-
-          <AnimatePresence>
-            {deficit > 0 && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="overflow-hidden"
-              >
-                <div className="bg-danger/10 rounded-xl px-4 py-3 mb-6 flex items-center justify-between gap-4 flex-wrap">
-                  <span className="text-danger text-sm font-medium">
-                    صرفت هذا الشهر أكثر من دخلك — راجع الفئات المتجاوزة أعلاه.
-                  </span>
-                  <span className="font-display font-extrabold text-danger text-lg">
-                    عجز {formatCurrency(deficit)}
-                  </span>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
 
           {data.unallocated > 1 && (
             <div className="bg-warning/10 text-warning text-sm font-medium rounded-xl px-4 py-3 mb-6">
@@ -131,6 +115,15 @@ export default function DashboardPage() {
             </div>
           )}
 
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+            <div className="bg-surface shadow-card rounded-2xl p-4 flex items-center justify-center">
+              <AllocationDonut categories={data.categories} totalIncome={data.totalIncome} totalSpent={data.totalSpent} />
+            </div>
+            <AlertsPanel categories={data.categories} />
+            <RecentActivity expenses={expenses} />
+          </div>
+
+          <h2 className="font-display font-bold text-lg mb-3">تفصيل الفئات</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence>
               {data.categories.map((category) => (
@@ -153,15 +146,6 @@ export default function DashboardPage() {
           />
         )}
       </AnimatePresence>
-
-      {categories.length > 0 && (
-        <button
-          onClick={() => setShowAddExpense(true)}
-          className="md:hidden fixed bottom-5 left-1/2 -translate-x-1/2 bg-primary text-white font-semibold px-6 py-3 rounded-full shadow-card"
-        >
-          + إضافة مصروف
-        </button>
-      )}
     </Shell>
   );
 }

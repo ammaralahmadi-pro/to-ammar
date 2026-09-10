@@ -67,7 +67,7 @@ export default function SalaryForm({ year, month, initialAmount, initialExtra, o
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary hover:bg-primarydark text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
+          className="w-full bg-primary hover:bg-primarydark hover:shadow-glow text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
         >
           {loading ? 'جارِ الحفظ...' : 'حفظ وتوزيع'}
         </button>

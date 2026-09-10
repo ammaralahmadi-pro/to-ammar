@@ -104,7 +104,7 @@ export default function AddExpenseModal({ categories, defaultCategoryId, onClose
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 py-2.5 rounded-lg bg-primary hover:bg-primarydark text-white font-semibold disabled:opacity-50"
+              className="flex-1 py-2.5 rounded-lg bg-primary hover:bg-primarydark hover:shadow-glow text-white font-semibold disabled:opacity-50"
             >
               {loading ? 'جارِ الحفظ...' : 'حفظ'}
             </button>

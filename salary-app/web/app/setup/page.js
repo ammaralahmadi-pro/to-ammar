@@ -176,7 +176,7 @@ export default function SetupPage() {
                   إلغاء
                 </button>
               )}
-              <button type="submit" className="flex-1 py-2.5 rounded-lg bg-primary hover:bg-primarydark text-white font-semibold">
+              <button type="submit" className="flex-1 py-2.5 rounded-lg bg-primary hover:bg-primarydark hover:shadow-glow text-white font-semibold">
                 {editingId ? 'حفظ التعديل' : 'إضافة الفئة'}
               </button>
             </div>

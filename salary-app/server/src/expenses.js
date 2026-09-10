@@ -14,7 +14,11 @@ router.get('/', async (req, res) => {
   const where = { userId: req.userId, year, month };
   if (req.query.categoryId) where.categoryId = req.query.categoryId;
 
-  const expenses = await prisma.expense.findMany({ where, orderBy: { date: 'desc' } });
+  const expenses = await prisma.expense.findMany({
+    where,
+    orderBy: { date: 'desc' },
+    include: { category: { select: { name: true } } },
+  });
   res.json({ expenses });
 });
 
