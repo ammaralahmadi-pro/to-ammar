@@ -29,30 +29,8 @@ function LoginContent() {
         {/* توهّج خلفي */}
         <div className="absolute w-64 h-64 rounded-full bg-apricot/25 blur-3xl" />
 
-        {/* حلقة الإطلاق + خطوط إشعاع */}
-        <svg width="220" height="180" viewBox="0 0 220 180" fill="none" className="relative">
-          <ellipse cx="110" cy="150" rx="70" ry="14" fill="#12224f" />
-          {[...Array(9)].map((_, i) => {
-            const angle = (-70 + i * 17.5) * (Math.PI / 180);
-            const x1 = 110 + Math.sin(angle) * 46;
-            const y1 = 150 - Math.cos(angle) * 46;
-            const x2 = 110 + Math.sin(angle) * 78;
-            const y2 = 150 - Math.cos(angle) * 78;
-            return (
-              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#f6c453" strokeWidth="3" strokeLinecap="round" />
-            );
-          })}
-          <circle cx="110" cy="150" r="44" fill="#f6c453" />
-          {/* شخصية مبسّطة تنطلق للأعلى */}
-          <g>
-            <circle cx="110" cy="88" r="15" fill="#ffd9a8" />
-            <path d="M96 108c2-9 8-14 14-14s12 5 14 14l4 26c1 6-3 11-9 11H101c-6 0-10-5-9-11z" fill="#0a6bf5" />
-            <path d="M100 142l-9 22" stroke="#12224f" strokeWidth="6" strokeLinecap="round" />
-            <path d="M120 142l9 22" stroke="#12224f" strokeWidth="6" strokeLinecap="round" />
-            <path d="M97 112l-16 10" stroke="#ffd9a8" strokeWidth="6" strokeLinecap="round" />
-            <path d="M123 112l16 10" stroke="#ffd9a8" strokeWidth="6" strokeLinecap="round" />
-          </g>
-        </svg>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/login-illustration.png" alt="" className="relative w-64 sm:w-72 h-auto" />
       </div>
 
       {/* ===== القسم السفلي: بطاقة داكنة ===== */}
