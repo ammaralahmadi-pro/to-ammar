@@ -11,12 +11,28 @@ const STATUS_STYLES = {
   over: { bar: 'bg-danger', text: 'text-danger' },
 };
 
-export default function CategoryCard({ category, onUpdate }) {
+export default function CategoryCard({ category, onUpdate, onQuickAdd }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ name: category.name, type: category.type, value: String(category.value) });
   const [saving, setSaving] = useState(false);
+  const [quickAmount, setQuickAmount] = useState('');
+  const [addingExpense, setAddingExpense] = useState(false);
   const style = STATUS_STYLES[category.status] || STATUS_STYLES.ok;
   const percent = Math.min(category.percentUsed * 100, 100);
+
+  async function handleQuickAdd(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const amount = Number(quickAmount);
+    if (!amount || amount <= 0) return;
+    setAddingExpense(true);
+    try {
+      await onQuickAdd(category.id, amount);
+      setQuickAmount('');
+    } finally {
+      setAddingExpense(false);
+    }
+  }
 
   function startEdit(e) {
     e.preventDefault();
@@ -135,6 +151,31 @@ export default function CategoryCard({ category, onUpdate }) {
             <span className="text-gray-400">من {formatCurrency(category.planned)}</span>
           </div>
         </Link>
+      )}
+
+      {!editing && onQuickAdd && (
+        <form
+          onSubmit={handleQuickAdd}
+          className="flex gap-2 mt-3 pt-3 border-t border-gray-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={quickAmount}
+            onChange={(e) => setQuickAmount(e.target.value)}
+            placeholder="أضف مصروف سريع..."
+            className="flex-1 min-w-0 border border-gray-200 rounded-lg px-2 py-1.5 text-sm"
+          />
+          <button
+            type="submit"
+            disabled={addingExpense}
+            className="bg-primary hover:bg-primarydark text-white text-sm font-semibold px-3 rounded-lg disabled:opacity-50"
+          >
+            +
+          </button>
+        </form>
       )}
     </motion.div>
   );

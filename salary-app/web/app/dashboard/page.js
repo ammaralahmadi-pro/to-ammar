@@ -71,6 +71,11 @@ export default function DashboardPage() {
     await load();
   }
 
+  async function handleQuickAddExpense(categoryId, amount) {
+    await api.createExpense({ categoryId, amount, date: new Date().toISOString().slice(0, 10) });
+    await load();
+  }
+
   if (!authChecked || loading || !data) {
     return (
       <div className="min-h-screen flex items-center justify-center text-gray-400">جارِ التحميل...</div>
@@ -139,7 +144,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <AnimatePresence>
               {data.categories.map((category) => (
-                <CategoryCard key={category.id} category={category} onUpdate={handleUpdateCategory} />
+                <CategoryCard
+                  key={category.id}
+                  category={category}
+                  onUpdate={handleUpdateCategory}
+                  onQuickAdd={handleQuickAddExpense}
+                />
               ))}
             </AnimatePresence>
           </div>
