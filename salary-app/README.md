@@ -45,6 +45,38 @@ npm run dev
 افتح `http://localhost:3100`، أنشئ حسابًا جديدًا (بريد إلكتروني + كلمة مرور)، ثم أدخل راتبك
 الأول من لوحة التحكم.
 
+## النشر (بنفس طريقة نشر "مواعيدنا" — مستودع واحد، مشروعان منفصلان)
+
+هذا مشروع مستقل داخل نفس المستودع، لذا يُنشر كـ **مشروعَين منفصلين جديدين** على نفس
+المنصّات المستخدمة لتطبيق "مواعيدنا"، مع تحديد مجلد الجذر (Root Directory) لكل منهما:
+
+### 1) قاعدة البيانات
+
+أنشئ قاعدة بيانات PostgreSQL مجانية (مثل [Neon](https://neon.tech) أو
+[Supabase](https://supabase.com)) وانسخ رابط الاتصال (`DATABASE_URL`).
+
+### 2) الخادم — Render أو Railway أو Fly.io
+
+1. أنشئ **خدمة جديدة (New Web Service)** من نفس مستودع GitHub هذا.
+2. **مهم:** اضبط **Root Directory** على `salary-app/server` (حتى لا يتعارض مع خادم
+   "مواعيدنا" في نفس المستودع).
+3. Build Command: `npm install && npm run build` — Start Command: `npm start`.
+4. أضف متغيرات البيئة: `DATABASE_URL`، `JWT_SECRET` (أنشئه بـ `openssl rand -hex 32`)،
+   `FRONTEND_URL` (رابط الواجهة بعد نشرها في الخطوة التالية)، و`NODE_ENV=production`.
+5. بعد أول نشر ناجح انسخ رابط الخادم (مثل `https://salary-app-server.onrender.com`).
+
+### 3) الواجهة — Vercel
+
+1. **Add New Project** من نفس مستودع GitHub هذا (مشروع Vercel جديد، منفصل عن مشروع
+   "مواعيدنا").
+2. **مهم:** اضبط **Root Directory** على `salary-app/web`.
+3. Framework Preset: Next.js (يُكتشف تلقائيًا بفضل `vercel.json`).
+4. أضف متغيّر البيئة `NEXT_PUBLIC_API_URL` = رابط الخادم من الخطوة السابقة.
+5. ارجع لإعدادات الخادم وحدّث `FRONTEND_URL` إلى رابط Vercel النهائي (مثل
+   `https://salary-app-web.vercel.app`) ثم أعد نشر الخادم.
+
+بعد ذلك يكون رابط التطبيق النهائي هو رابط مشروع Vercel (خطوة 2 أعلاه) — وهو ما تدخل عليه.
+
 ## نموذج البيانات (Prisma)
 
 - `User`: id, name, email, passwordHash, currency, createdAt
