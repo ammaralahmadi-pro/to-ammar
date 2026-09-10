@@ -15,7 +15,7 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
   const [allDay, setAllDay] = useState(initial?.allDay || false);
   const [startAt, setStartAt] = useState(toLocalInput(initial?.startAt));
   const [endAt, setEndAt] = useState(toLocalInput(initial?.endAt || addHour(initial?.startAt)));
-  const [visibility, setVisibility] = useState(initial?.visibility || 'shared');
+  const [visibility, setVisibility] = useState(initial ? (initial.isFamilyEvent ? 'shared' : 'mine') : 'shared');
   const [error, setError] = useState('');
 
   function addHour(value) {
@@ -114,8 +114,9 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
             <div className="flex gap-2">
               <button
                 type="button"
+                disabled={Boolean(initial)}
                 onClick={() => setVisibility('shared')}
-                className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition ${
+                className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition disabled:opacity-60 ${
                   visibility === 'shared' ? 'bg-apricot border-apricot text-black' : 'border-black/10 text-black/50'
                 }`}
               >
@@ -123,14 +124,20 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
               </button>
               <button
                 type="button"
+                disabled={Boolean(initial)}
                 onClick={() => setVisibility('mine')}
-                className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition ${
+                className={`flex-1 rounded-xl py-2.5 text-sm font-bold border transition disabled:opacity-60 ${
                   visibility === 'mine' ? 'bg-apricot border-apricot text-black' : 'border-black/10 text-black/50'
                 }`}
               >
                 لي وحدي
               </button>
             </div>
+            {initial && (
+              <span className="text-[11px] text-black/40">
+                لا يمكن تغيير هذا بعد الإنشاء — احذف الموعد وأضفه من جديد لو احتجت تبدّله.
+              </span>
+            )}
           </div>
         </div>
 
