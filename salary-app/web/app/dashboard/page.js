@@ -13,6 +13,7 @@ import AlertsPanel from '../../components/AlertsPanel';
 import RecentActivity from '../../components/RecentActivity';
 import StatStrip from '../../components/StatStrip';
 import ExpenseLog from '../../components/ExpenseLog';
+import IncomeSummaryCard from '../../components/IncomeSummaryCard';
 import { api } from '../../lib/api';
 import { formatCurrency } from '../../lib/format';
 
@@ -139,6 +140,10 @@ export default function DashboardPage() {
             </div>
             <AlertsPanel categories={data.categories} />
             <RecentActivity expenses={expenses} />
+          </div>
+
+          <div className="mb-8">
+            <IncomeSummaryCard baseSalary={data.salary} extraIncome={data.extraIncome} />
           </div>
 
           <h2 className="font-display font-bold text-lg mb-3">تفصيل الفئات</h2>
