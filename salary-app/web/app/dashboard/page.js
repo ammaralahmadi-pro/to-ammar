@@ -60,6 +60,7 @@ export default function DashboardPage() {
   }
 
   const savingCategory = data.categories.find((c) => c.name.includes('ادخار'));
+  const deficit = data.totalRemaining < 0 ? Math.abs(data.totalRemaining) : 0;
 
   return (
     <Shell onAddExpense={categories.length ? () => setShowAddExpense(true) : undefined}>
@@ -103,6 +104,26 @@ export default function DashboardPage() {
               <AllocationDonut categories={data.categories} totalIncome={data.totalIncome} totalSpent={data.totalSpent} />
             </div>
           </div>
+
+          <AnimatePresence>
+            {deficit > 0 && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="bg-danger/10 rounded-xl px-4 py-3 mb-6 flex items-center justify-between gap-4 flex-wrap">
+                  <span className="text-danger text-sm font-medium">
+                    صرفت هذا الشهر أكثر من دخلك — راجع الفئات المتجاوزة أعلاه.
+                  </span>
+                  <span className="font-display font-extrabold text-danger text-lg">
+                    عجز {formatCurrency(deficit)}
+                  </span>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {data.unallocated > 1 && (
             <div className="bg-warning/10 text-warning text-sm font-medium rounded-xl px-4 py-3 mb-6">
