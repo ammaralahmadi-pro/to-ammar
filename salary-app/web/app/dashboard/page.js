@@ -88,15 +88,16 @@ export default function DashboardPage() {
   const stats = [
     {
       label: 'المتبقي من الشهر',
-      value: formatCurrency(data.totalRemaining),
+      value: data.totalRemaining,
+      format: formatCurrency,
       color: data.totalRemaining < 0 ? 'text-danger' : 'text-gray-900',
     },
-    { label: 'إجمالي الدخل', value: formatCurrency(data.totalIncome), color: 'text-gray-900' },
+    { label: 'إجمالي الدخل', value: data.totalIncome, format: formatCurrency, color: 'text-gray-900' },
     ...(savingCategory
-      ? [{ label: 'الادخار الفعلي', value: formatCurrency(savingCategory.spent), color: 'text-success' }]
+      ? [{ label: 'الادخار الفعلي', value: savingCategory.spent, format: formatCurrency, color: 'text-success' }]
       : []),
-    { label: 'عدد الفئات', value: data.categories.length, color: 'text-gray-900' },
-    ...(deficit > 0 ? [{ label: 'عجز الشهر', value: formatCurrency(deficit), color: 'text-danger' }] : []),
+    { label: 'عدد الفئات', value: data.categories.length, format: (v) => Math.round(v).toLocaleString('en-US'), color: 'text-gray-900' },
+    ...(deficit > 0 ? [{ label: 'عجز الشهر', value: deficit, format: formatCurrency, color: 'text-danger' }] : []),
   ];
 
   return (

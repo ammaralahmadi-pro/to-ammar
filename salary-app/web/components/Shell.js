@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { api } from '../lib/api';
 
 const NAV_ITEMS = [
@@ -27,29 +28,39 @@ export default function Shell({ children, onAddExpense }) {
           </span>
 
           <nav className="flex items-center gap-1 bg-surface2 rounded-full p-1">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  pathname === item.href
-                    ? 'bg-primary text-white shadow-glow'
-                    : 'text-gray-500 hover:text-gray-800'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {NAV_ITEMS.map((item) => {
+              const active = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`relative px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    active ? 'text-white' : 'text-gray-500 hover:text-gray-800'
+                  }`}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="nav-active-pill"
+                      className="absolute inset-0 bg-primary rounded-full shadow-glow -z-10"
+                      transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                    />
+                  )}
+                  {item.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-2">
             {onAddExpense && (
-              <button
+              <motion.button
                 onClick={onAddExpense}
-                className="bg-primary hover:bg-primarydark hover:shadow-glow text-white text-sm font-semibold px-4 py-2 rounded-full transition"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                className="bg-primary hover:bg-primarydark hover:shadow-glow text-white text-sm font-semibold px-4 py-2 rounded-full transition-colors"
               >
                 + إضافة مصروف
-              </button>
+              </motion.button>
             )}
             <button
               onClick={handleLogout}

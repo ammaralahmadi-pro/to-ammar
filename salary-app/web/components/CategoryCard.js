@@ -61,6 +61,7 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd }) {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={{ y: -3, boxShadow: '0 0 0 1px rgba(255,255,255,.1), 0 16px 32px -14px rgba(139,92,246,.35)' }}
       transition={{ duration: 0.25 }}
       className="bg-surface shadow-card rounded-xl p-4 relative"
     >
@@ -168,13 +169,15 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd }) {
             placeholder="أضف مصروف سريع..."
             className="flex-1 min-w-0 border border-gray-200 rounded-lg px-2 py-1.5 text-sm"
           />
-          <button
+          <motion.button
             type="submit"
             disabled={addingExpense}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             className="bg-primary hover:bg-primarydark text-white text-sm font-semibold px-3 rounded-lg disabled:opacity-50"
           >
             +
-          </button>
+          </motion.button>
         </form>
       )}
     </motion.div>

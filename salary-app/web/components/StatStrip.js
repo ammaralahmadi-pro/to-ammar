@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import AnimatedNumber from './AnimatedNumber';
 
 export default function StatStrip({ items }) {
   return (
@@ -15,7 +16,7 @@ export default function StatStrip({ items }) {
         >
           <p className="text-gray-500 text-xs mb-1">{item.label}</p>
           <p className={`font-display font-extrabold text-xl sm:text-2xl ${item.color || 'text-gray-900'}`}>
-            {item.value}
+            <AnimatedNumber value={item.value} format={item.format} />
           </p>
         </motion.div>
       ))}

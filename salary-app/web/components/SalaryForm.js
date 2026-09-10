@@ -64,13 +64,15 @@ export default function SalaryForm({ year, month, initialAmount, initialExtra, o
           />
         </div>
         {error && <p className="text-danger text-sm">{error}</p>}
-        <button
+        <motion.button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary hover:bg-primarydark hover:shadow-glow text-white font-semibold py-2.5 rounded-lg transition disabled:opacity-50"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          className="w-full bg-primary hover:bg-primarydark hover:shadow-glow text-white font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-50"
         >
           {loading ? 'جارِ الحفظ...' : 'حفظ وتوزيع'}
-        </button>
+        </motion.button>
       </form>
     </motion.div>
   );
