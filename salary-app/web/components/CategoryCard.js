@@ -138,6 +138,9 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd, featured 
           <div className="flex items-center justify-between md:justify-start md:gap-2 text-sm whitespace-nowrap">
             <span className={`font-medium ${style.text}`}>{formatCurrency(category.spent)}</span>
             <span className="text-gray-400">من {formatCurrency(category.planned)}</span>
+            <span className={`font-medium ${category.remaining < 0 ? 'text-danger' : 'text-gray-500'}`}>
+              المتبقي: {formatCurrency(category.remaining)}
+            </span>
           </div>
           <button
             onClick={startEdit}
@@ -209,9 +212,15 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd, featured 
             />
           </div>
 
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-sm mb-1">
             <span className={`font-medium ${style.text}`}>{formatCurrency(category.spent)}</span>
             <span className="text-gray-400">من {formatCurrency(category.planned)}</span>
+          </div>
+
+          <div className="text-xs">
+            <span className={category.remaining < 0 ? 'text-danger font-medium' : 'text-gray-500'}>
+              المتبقي: {formatCurrency(category.remaining)}
+            </span>
           </div>
         </Link>
       )}
