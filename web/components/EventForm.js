@@ -36,9 +36,9 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 px-0 sm:px-4">
       <form
         onSubmit={handleSubmit}
-        className="w-full sm:max-w-md bg-[#1c2150] text-white rounded-t-3xl sm:rounded-2xl shadow-card max-h-[92vh] overflow-y-auto"
+        className="w-full sm:max-w-md bg-[#20265a] text-white rounded-t-3xl sm:rounded-2xl shadow-card max-h-[92vh] overflow-y-auto"
       >
-        <div className="sticky top-0 bg-[#1c2150] flex items-center justify-between px-5 py-4 border-b border-white/10">
+        <div className="sticky top-0 bg-[#20265a] flex items-center justify-between px-5 py-4 border-b border-white/10">
           <h2 className="font-extrabold text-lg">{initial ? 'تعديل الموعد' : 'موعد جديد'}</h2>
           <button type="button" onClick={onClose} className="text-white/40 text-xl leading-none px-1" aria-label="إغلاق">
             ×
@@ -134,7 +134,7 @@ export default function EventForm({ initial, onSubmit, onClose, submitting }) {
           </div>
         </div>
 
-        <div className="sticky bottom-0 bg-[#1c2150] px-5 py-4 border-t border-white/10">
+        <div className="sticky bottom-0 bg-[#20265a] px-5 py-4 border-t border-white/10">
           <button
             type="submit"
             disabled={submitting}

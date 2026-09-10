@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { api } from '../../lib/api';
 import EventCard from '../../components/EventCard';
 import EventForm from '../../components/EventForm';
+import MonthCalendar from '../../components/MonthCalendar';
 
 const DAY_LABELS = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
@@ -48,6 +49,7 @@ export default function DashboardClient() {
   const [error, setError] = useState('');
   const [formState, setFormState] = useState(null); // null | 'new' | event object
   const [saving, setSaving] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -70,7 +72,10 @@ export default function DashboardClient() {
     load();
   }, [load]);
 
-  const dayGroups = useMemo(() => groupByDay(events), [events]);
+  const dayGroups = useMemo(() => {
+    const groups = groupByDay(events);
+    return selectedDate ? groups.filter(([dayKey]) => dayKey === selectedDate) : groups;
+  }, [events, selectedDate]);
 
   async function handleSubmit(payload) {
     setSaving(true);
@@ -124,6 +129,10 @@ export default function DashboardClient() {
       </header>
 
       <div className="max-w-lg mx-auto px-4 pt-5">
+        <div className="mb-5">
+          <MonthCalendar events={events} selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+        </div>
+
         {error && (
           <div className="mb-4 rounded-xl bg-white/10 px-4 py-3 text-sm text-white/80 flex items-center justify-between">
             {error}
@@ -142,7 +151,7 @@ export default function DashboardClient() {
         {!loading && dayGroups.length === 0 && !error && (
           <div className="text-center py-20 text-white/40">
             <p className="text-3xl mb-3">🗓️</p>
-            <p>لا توجد مواعيد قادمة خلال الثلاثة أسابيع القادمة.</p>
+            <p>{selectedDate ? 'لا توجد مواعيد في هذا اليوم.' : 'لا توجد مواعيد قادمة خلال الثلاثة أسابيع القادمة.'}</p>
           </div>
         )}
 

@@ -16,7 +16,7 @@ function LoginContent() {
   const error = params.get('error');
 
   return (
-    <main dir="rtl" className="min-h-screen flex flex-col bg-[#0e1a3a]">
+    <main dir="rtl" className="min-h-screen flex flex-col bg-[#161b3f]">
       {/* ===== القسم العلوي: خلفية داكنة مع رسمة توضيحية ===== */}
       <div className="relative flex-1 min-h-[300px] flex items-center justify-center overflow-hidden">
         {/* نجوم زخرفية */}
@@ -56,7 +56,7 @@ function LoginContent() {
       </div>
 
       {/* ===== القسم السفلي: بطاقة داكنة ===== */}
-      <div className="relative bg-[#12142b] rounded-t-[32px] px-6 pt-9 pb-9 flex flex-col items-center text-center shadow-[0_-20px_40px_-20px_rgba(0,0,0,.45)]">
+      <div className="relative bg-[#20265a] rounded-t-[32px] px-6 pt-9 pb-9 flex flex-col items-center text-center shadow-[0_-20px_40px_-20px_rgba(0,0,0,.45)]">
         <h1 className="text-2xl font-extrabold text-white leading-snug">
           لنبدأ رحلتكما<br />معًا
         </h1>
