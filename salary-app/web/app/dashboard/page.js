@@ -14,6 +14,7 @@ import RecentActivity from '../../components/RecentActivity';
 import StatStrip from '../../components/StatStrip';
 import ExpenseLog from '../../components/ExpenseLog';
 import IncomeSummaryCard from '../../components/IncomeSummaryCard';
+import FinancialScoreCards from '../../components/FinancialScoreCards';
 import { api } from '../../lib/api';
 import { formatCurrency } from '../../lib/format';
 
@@ -86,6 +87,40 @@ export default function DashboardPage() {
   const savingCategory = data.categories.find((c) => c.name.includes('ادخار'));
   const deficit = data.totalRemaining < 0 ? Math.abs(data.totalRemaining) : 0;
 
+  const okCategories = data.categories.filter((c) => c.status !== 'over').length;
+  const budgetScore = data.categories.length
+    ? Math.round((okCategories / data.categories.length) * 100)
+    : null;
+
+  const savingsScore = savingCategory
+    ? Math.min(100, Math.round((savingCategory.spent / (savingCategory.planned || 1)) * 100))
+    : data.totalIncome > 0
+      ? Math.round(Math.max(0, data.totalRemaining / data.totalIncome) * 100)
+      : null;
+
+  const overallScore =
+    budgetScore !== null && savingsScore !== null ? Math.round((budgetScore + savingsScore) / 2) : null;
+
+  const scoreCards = [
+    {
+      title: 'الالتزام بالميزانية',
+      description: 'يقيس نسبة الفئات اللي صرفك فيها لسا ضمن حدودها المخطط لها هذا الشهر.',
+      score: budgetScore,
+    },
+    {
+      title: savingCategory ? 'درجة الادخار' : 'درجة الفائض',
+      description: savingCategory
+        ? 'يقيس مدى التزامك بمبلغ الادخار المخطط له هذا الشهر.'
+        : 'يقيس نسبة الفائض المتبقي من دخلك بعد كل المصروفات.',
+      score: savingsScore,
+    },
+    {
+      title: 'الصحة المالية العامة',
+      description: 'مؤشر عام يجمع بين الالتزام بالميزانية والادخار لهذا الشهر.',
+      score: overallScore,
+    },
+  ].filter((c) => c.score !== null);
+
   const stats = [
     {
       label: 'المتبقي من الشهر',
@@ -145,6 +180,13 @@ export default function DashboardPage() {
           <div className="mb-8">
             <IncomeSummaryCard baseSalary={data.salary} extraIncome={data.extraIncome} />
           </div>
+
+          {scoreCards.length > 0 && (
+            <div className="mb-8">
+              <h2 className="font-display font-bold text-lg mb-3">مؤشرات الصحة المالية</h2>
+              <FinancialScoreCards cards={scoreCards} />
+            </div>
+          )}
 
           <h2 className="font-display font-bold text-lg mb-3">تفصيل الفئات</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
