@@ -87,6 +87,11 @@ export default function DashboardPage() {
   const savingCategory = data.categories.find((c) => c.name.includes('ادخار'));
   const deficit = data.totalRemaining < 0 ? Math.abs(data.totalRemaining) : 0;
 
+  const featuredCategory = data.categories.find((c) => c.name.includes('طوارئ'));
+  const otherCategories = featuredCategory
+    ? data.categories.filter((c) => c.id !== featuredCategory.id)
+    : data.categories;
+
   const okCategories = data.categories.filter((c) => c.status !== 'over').length;
   const budgetScore = data.categories.length
     ? Math.round((okCategories / data.categories.length) * 100)
@@ -189,9 +194,21 @@ export default function DashboardPage() {
           )}
 
           <h2 className="font-display font-bold text-lg mb-3">تفصيل الفئات</h2>
+
+          {featuredCategory && (
+            <div className="mb-4">
+              <CategoryCard
+                category={featuredCategory}
+                onUpdate={handleUpdateCategory}
+                onQuickAdd={handleQuickAddExpense}
+                featured
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
             <AnimatePresence>
-              {data.categories.map((category) => (
+              {otherCategories.map((category) => (
                 <CategoryCard
                   key={category.id}
                   category={category}

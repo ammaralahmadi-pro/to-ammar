@@ -11,7 +11,7 @@ const STATUS_STYLES = {
   over: { bar: 'bg-danger', text: 'text-danger' },
 };
 
-export default function CategoryCard({ category, onUpdate, onQuickAdd }) {
+export default function CategoryCard({ category, onUpdate, onQuickAdd, featured }) {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ name: category.name, type: category.type, value: String(category.value) });
   const [saving, setSaving] = useState(false);
@@ -114,6 +114,68 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd }) {
             </button>
           </div>
         </form>
+      ) : featured ? (
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <Link href={`/categories/${category.id}`} className="flex-1 min-w-0">
+            <div className="flex items-center justify-between md:justify-start md:gap-3 mb-2 md:mb-1">
+              <span className="font-semibold text-gray-800">{category.name}</span>
+              {category.status === 'over' && (
+                <span className="text-xs font-bold text-danger bg-danger/10 px-2 py-0.5 rounded-full">تجاوز الحد</span>
+              )}
+              {category.status === 'warning' && (
+                <span className="text-xs font-bold text-warning bg-warning/10 px-2 py-0.5 rounded-full">اقتراب من الحد</span>
+              )}
+            </div>
+            <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <motion.div
+                className={`h-full ${style.bar}`}
+                initial={{ width: 0 }}
+                animate={{ width: `${percent}%` }}
+                transition={{ duration: 0.6, ease: 'easeOut' }}
+              />
+            </div>
+          </Link>
+          <div className="flex items-center justify-between md:justify-start md:gap-2 text-sm whitespace-nowrap">
+            <span className={`font-medium ${style.text}`}>{formatCurrency(category.spent)}</span>
+            <span className="text-gray-400">من {formatCurrency(category.planned)}</span>
+          </div>
+          <button
+            onClick={startEdit}
+            className="text-gray-300 hover:text-primary transition-colors self-start md:self-center"
+            aria-label="تعديل الفئة"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+          </button>
+          {onQuickAdd && (
+            <form
+              onSubmit={handleQuickAdd}
+              className="flex gap-2 md:w-64"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={quickAmount}
+                onChange={(e) => setQuickAmount(e.target.value)}
+                placeholder="أضف مصروف سريع..."
+                className="flex-1 min-w-0 border border-gray-200 rounded-lg px-2 py-1.5 text-sm"
+              />
+              <motion.button
+                type="submit"
+                disabled={addingExpense}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.92 }}
+                className="bg-primary hover:bg-primarydark text-white text-sm font-semibold px-3 rounded-lg disabled:opacity-50"
+              >
+                +
+              </motion.button>
+            </form>
+          )}
+        </div>
       ) : (
         <Link href={`/categories/${category.id}`} className="block">
           <div className="flex items-center justify-between mb-2">
@@ -154,7 +216,7 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd }) {
         </Link>
       )}
 
-      {!editing && onQuickAdd && (
+      {!editing && !featured && onQuickAdd && (
         <form
           onSubmit={handleQuickAdd}
           className="flex gap-2 mt-3 pt-3 border-t border-gray-100"

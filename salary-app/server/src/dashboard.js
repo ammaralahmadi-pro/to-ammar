@@ -39,7 +39,7 @@ router.get('/:year/:month', async (req, res) => {
 
     let status = 'ok';
     if (percentUsed > 1) status = 'over';
-    else if (percentUsed >= WARNING_THRESHOLD) status = 'warning';
+    else if (percentUsed >= WARNING_THRESHOLD && percentUsed < 1) status = 'warning';
 
     totalPlanned += planned;
     totalSpent += spent;
