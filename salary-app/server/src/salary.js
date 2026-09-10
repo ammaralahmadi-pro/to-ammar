@@ -15,6 +15,18 @@ function parsePeriod(req, res) {
   return { year, month };
 }
 
+router.get('/summary/extra-income', async (req, res) => {
+  const result = await prisma.monthlySalary.aggregate({
+    where: { userId: req.userId, extraIncome: { gt: 0 } },
+    _sum: { extraIncome: true },
+    _count: { extraIncome: true },
+  });
+  res.json({
+    total: result._sum.extraIncome || 0,
+    monthsCount: result._count.extraIncome || 0,
+  });
+});
+
 router.get('/:year/:month', async (req, res) => {
   const period = parsePeriod(req, res);
   if (!period) return;

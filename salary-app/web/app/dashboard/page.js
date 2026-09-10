@@ -14,6 +14,7 @@ import RecentActivity from '../../components/RecentActivity';
 import StatStrip from '../../components/StatStrip';
 import ExpenseLog from '../../components/ExpenseLog';
 import IncomeSummaryCard from '../../components/IncomeSummaryCard';
+import ExtraIncomeSummaryCard from '../../components/ExtraIncomeSummaryCard';
 import FinancialScoreCards from '../../components/FinancialScoreCards';
 import { api } from '../../lib/api';
 import { formatCurrency } from '../../lib/format';
@@ -32,17 +33,20 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [extraIncomeSummary, setExtraIncomeSummary] = useState({ total: 0, monthsCount: 0 });
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [dashboard, cats, expensesRes] = await Promise.all([
+    const [dashboard, cats, expensesRes, extraIncome] = await Promise.all([
       api.getDashboard(period.year, period.month),
       api.listCategories(),
       api.listExpenses(period.year, period.month),
+      api.getExtraIncomeSummary(),
     ]);
     setData(dashboard);
     setCategories(cats.categories);
     setExpenses(expensesRes.expenses);
+    setExtraIncomeSummary(extraIncome);
     setLoading(false);
   }, [period]);
 
@@ -182,8 +186,9 @@ export default function DashboardPage() {
             <RecentActivity expenses={expenses} />
           </div>
 
-          <div className="mb-8">
+          <div className="mb-8 space-y-4">
             <IncomeSummaryCard baseSalary={data.salary} extraIncome={data.extraIncome} />
+            <ExtraIncomeSummaryCard total={extraIncomeSummary.total} monthsCount={extraIncomeSummary.monthsCount} />
           </div>
 
           {scoreCards.length > 0 && (

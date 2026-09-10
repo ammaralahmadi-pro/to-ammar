@@ -66,6 +66,7 @@ export const api = {
 
   getSalary: (year, month) => request(`/salary/${year}/${month}`),
   setSalary: (year, month, data) => request(`/salary/${year}/${month}`, { method: 'PUT', body: JSON.stringify(data) }),
+  getExtraIncomeSummary: () => request('/salary/summary/extra-income'),
 
   listExpenses: (year, month, categoryId) =>
     request(`/expenses?year=${year}&month=${month}${categoryId ? `&categoryId=${categoryId}` : ''}`),
