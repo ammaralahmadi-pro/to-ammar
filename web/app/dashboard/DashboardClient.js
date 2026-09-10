@@ -105,8 +105,8 @@ export default function DashboardClient() {
   }
 
   return (
-    <main className="min-h-screen pb-28">
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-black/5">
+    <main className="min-h-screen pb-28 bg-[#161b3f] text-white">
+      <header className="sticky top-0 z-30 bg-[#161b3f]/95 backdrop-blur border-b border-white/10">
         <div className="max-w-lg mx-auto px-4 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-apricot flex items-center justify-center text-sm font-extrabold">
@@ -114,10 +114,10 @@ export default function DashboardClient() {
             </div>
             <div>
               <h1 className="font-extrabold text-[15px] leading-none">مواعيدنا</h1>
-              {user && <p className="text-[11px] text-black/40 mt-0.5">{user.name}</p>}
+              {user && <p className="text-[11px] text-white/40 mt-0.5">{user.name}</p>}
             </div>
           </div>
-          <button onClick={handleLogout} className="text-xs font-bold text-black/40 px-2 py-1">
+          <button onClick={handleLogout} className="text-xs font-bold text-white/40 px-2 py-1">
             تسجيل الخروج
           </button>
         </div>
@@ -125,7 +125,7 @@ export default function DashboardClient() {
 
       <div className="max-w-lg mx-auto px-4 pt-5">
         {error && (
-          <div className="mb-4 rounded-xl bg-glaze px-4 py-3 text-sm text-black/80 flex items-center justify-between">
+          <div className="mb-4 rounded-xl bg-white/10 px-4 py-3 text-sm text-white/80 flex items-center justify-between">
             {error}
             <button onClick={load} className="font-bold text-xs">إعادة المحاولة</button>
           </div>
@@ -134,13 +134,13 @@ export default function DashboardClient() {
         {loading && (
           <div className="flex flex-col gap-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 rounded-xl bg-glaze animate-pulse" />
+              <div key={i} className="h-16 rounded-xl bg-white/10 animate-pulse" />
             ))}
           </div>
         )}
 
         {!loading && dayGroups.length === 0 && !error && (
-          <div className="text-center py-20 text-black/40">
+          <div className="text-center py-20 text-white/40">
             <p className="text-3xl mb-3">🗓️</p>
             <p>لا توجد مواعيد قادمة خلال الثلاثة أسابيع القادمة.</p>
           </div>
@@ -149,7 +149,7 @@ export default function DashboardClient() {
         <div className="flex flex-col gap-6">
           {dayGroups.map(([dayKey, dayEvents]) => (
             <section key={dayKey}>
-              <h2 className="text-xs font-extrabold text-black/50 mb-2 px-1">{formatDayHeading(dayKey)}</h2>
+              <h2 className="text-xs font-extrabold text-white/50 mb-2 px-1">{formatDayHeading(dayKey)}</h2>
               <div className="flex flex-col gap-2">
                 {dayEvents.map((event) => (
                   <EventCard key={event.id} event={event} onEdit={setFormState} onDelete={handleDelete} />
