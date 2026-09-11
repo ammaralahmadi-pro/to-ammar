@@ -15,7 +15,7 @@ export default function CategoryGauge({ planned, spent, status }) {
 
   const data = overflow > 0
     ? [{ value: planned, fill: `url(#${gradientId})` }, { value: overflow, fill: '#7f1d1d' }]
-    : [{ value: spent, fill: `url(#${gradientId})` }, { value: remaining, fill: '#252a3b' }];
+    : [{ value: spent, fill: `url(#${gradientId})` }, { value: remaining, fill: '#332821' }];
 
   return (
     <div className="w-32 h-32 mx-auto">

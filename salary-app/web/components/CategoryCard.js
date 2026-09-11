@@ -67,7 +67,7 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd, featured 
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ y: -3, boxShadow: '0 0 0 1px rgba(255,255,255,.1), 0 16px 32px -14px rgba(139,92,246,.35)' }}
+      whileHover={{ y: -3, boxShadow: '0 0 0 1px rgba(255,255,255,.1), 0 16px 32px -14px rgba(231,111,81,.35)' }}
       transition={{ duration: 0.25 }}
       className="bg-surface shadow-card rounded-xl p-4 relative"
     >

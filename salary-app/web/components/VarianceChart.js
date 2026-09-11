@@ -17,8 +17,8 @@ export default function VarianceChart({ title, items, polarity }) {
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,.06)" vertical={false} />
-            <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#84899e' }} interval={0} angle={-20} textAnchor="end" height={60} />
-            <YAxis tick={{ fontSize: 11, fill: '#84899e' }} />
+            <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9c8a78' }} interval={0} angle={-20} textAnchor="end" height={60} />
+            <YAxis tick={{ fontSize: 11, fill: '#9c8a78' }} />
             <Tooltip
               formatter={(value) => formatCurrency(value)}
               contentStyle={{ direction: 'rtl', textAlign: 'right', borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,.3)' }}
@@ -26,7 +26,7 @@ export default function VarianceChart({ title, items, polarity }) {
             <Bar dataKey="diff" radius={[4, 4, 4, 4]}>
               {data.map((entry, i) => {
                 const good = polarity === 'higherBetter' ? entry.diff >= 0 : entry.diff <= 0;
-                return <Cell key={i} fill={entry.diff === 0 ? '#42475d' : good ? '#22c55e' : '#ef4444'} />;
+                return <Cell key={i} fill={entry.diff === 0 ? '#544233' : good ? '#22c55e' : '#ef4444'} />;
               })}
             </Bar>
           </BarChart>

@@ -69,7 +69,7 @@ export default function IncomeSummaryCard(props) {
                   cx={dot.x}
                   cy={dot.y}
                   r="6"
-                  fill="#5A8CEF"
+                  fill="#e76f51"
                   variants={shouldAnimate ? dotVariants : {}}
                   initial="hidden"
                   animate="visible"
@@ -81,7 +81,7 @@ export default function IncomeSummaryCard(props) {
                   cx={dot.x}
                   cy={dot.y}
                   r="6"
-                  fill="#4B7A63"
+                  fill="#e9c46a"
                   variants={shouldAnimate ? dotVariants : {}}
                   initial="hidden"
                   animate="visible"
@@ -116,7 +116,7 @@ export default function IncomeSummaryCard(props) {
               <div className="flex items-center gap-2">
                 <motion.div
                   className="w-0.5 h-4 rounded-full"
-                  style={{ backgroundColor: '#5A8CEF' }}
+                  style={{ backgroundColor: '#e76f51' }}
                   initial={shouldAnimate ? { opacity: 0, scaleY: 0 } : {}}
                   animate={shouldAnimate ? { opacity: 1, scaleY: 1 } : {}}
                   transition={{ delay: 0.4, type: 'spring' }}
@@ -144,7 +144,7 @@ export default function IncomeSummaryCard(props) {
               <div className="flex items-center gap-2">
                 <motion.div
                   className="w-0.5 h-4 rounded-full"
-                  style={{ backgroundColor: '#4B7A63' }}
+                  style={{ backgroundColor: '#e9c46a' }}
                   initial={shouldAnimate ? { opacity: 0, scaleY: 0 } : {}}
                   animate={shouldAnimate ? { opacity: 1, scaleY: 1 } : {}}
                   transition={{ delay: 0.8, type: 'spring' }}

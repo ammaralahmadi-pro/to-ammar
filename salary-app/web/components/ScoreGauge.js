@@ -27,7 +27,7 @@ export default function ScoreGauge({ score, max = 100 }) {
   const distHalf = dist / 2;
   const distFourth = distHalf / 2;
   const strength = getStrength(score);
-  const colors = STRENGTH_COLORS[strength] || ['#666b82', '#42475d'];
+  const colors = STRENGTH_COLORS[strength] || ['#7d6a58', '#544233'];
   const strokeDashoffset = score !== null ? Math.min(score / max, 1) * -distHalf : -distFourth;
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function ScoreGauge({ score, max = 100 }) {
         </linearGradient>
       </defs>
       <g fill="none" strokeWidth="10" transform="translate(50, 50.5)">
-        <circle stroke="#252a3b" r={radius} />
+        <circle stroke="#332821" r={radius} />
         <circle
           ref={strokeRef}
           stroke={`url(#${gradientId.current})`}
