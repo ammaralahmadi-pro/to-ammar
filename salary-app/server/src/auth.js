@@ -13,7 +13,15 @@ const router = express.Router();
 const pendingStates = new Set();
 
 function publicUser(user) {
-  return { id: user.id, name: user.name, email: user.email, pictureUrl: user.pictureUrl, currency: user.currency };
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    pictureUrl: user.pictureUrl,
+    currency: user.currency,
+    autoSaveEnabled: user.autoSaveEnabled,
+    autoSavePercent: user.autoSavePercent,
+  };
 }
 
 router.get('/google/login', (req, res) => {
@@ -71,6 +79,20 @@ router.post('/logout', (req, res) => {
 router.get('/me', requireAuth, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.userId } });
   if (!user) return res.status(401).json({ error: 'المستخدم غير موجود' });
+  res.json({ user: publicUser(user) });
+});
+
+router.patch('/settings', requireAuth, async (req, res) => {
+  const { autoSaveEnabled, autoSavePercent } = req.body || {};
+  const data = {};
+  if (autoSaveEnabled !== undefined) data.autoSaveEnabled = Boolean(autoSaveEnabled);
+  if (autoSavePercent !== undefined) {
+    if (typeof autoSavePercent !== 'number' || autoSavePercent < 0 || autoSavePercent > 100) {
+      return res.status(400).json({ error: 'نسبة غير صحيحة' });
+    }
+    data.autoSavePercent = autoSavePercent;
+  }
+  const user = await prisma.user.update({ where: { id: req.userId }, data });
   res.json({ user: publicUser(user) });
 });
 

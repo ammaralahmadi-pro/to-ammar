@@ -58,9 +58,11 @@ export const api = {
     return request('/auth/logout', { method: 'POST' }).catch(() => {});
   },
   me: () => request('/auth/me'),
+  updateSettings: (data) => request('/auth/settings', { method: 'PATCH', body: JSON.stringify(data) }),
 
   listCategories: () => request('/categories'),
   createCategory: (data) => request('/categories', { method: 'POST', body: JSON.stringify(data) }),
+  applyBudgetTemplate: (data) => request('/categories/apply-template', { method: 'POST', body: JSON.stringify(data) }),
   updateCategory: (id, data) => request(`/categories/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteCategory: (id) => request(`/categories/${id}`, { method: 'DELETE' }),
 

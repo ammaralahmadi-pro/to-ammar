@@ -52,6 +52,29 @@ router.put('/:year/:month', async (req, res) => {
     update: { amount, extraIncome: extra },
     create: { userId: req.userId, ...period, amount, extraIncome: extra },
   });
+
+  const user = await prisma.user.findUnique({ where: { id: req.userId } });
+  if (user?.autoSaveEnabled) {
+    const savingsCategory = await prisma.category.findFirst({
+      where: { userId: req.userId, group: 'savings' },
+      orderBy: { sortOrder: 'asc' },
+    });
+    if (savingsCategory) {
+      const autoSaveAmount = ((amount + extra) * user.autoSavePercent) / 100;
+      const marker = 'ادخار تلقائي (ادفع لنفسك أولاً)';
+      const existingExpense = await prisma.expense.findFirst({
+        where: { userId: req.userId, categoryId: savingsCategory.id, ...period, description: marker },
+      });
+      if (existingExpense) {
+        await prisma.expense.update({ where: { id: existingExpense.id }, data: { amount: autoSaveAmount } });
+      } else {
+        await prisma.expense.create({
+          data: { userId: req.userId, categoryId: savingsCategory.id, ...period, amount: autoSaveAmount, description: marker },
+        });
+      }
+    }
+  }
+
   res.json({ salary });
 });
 

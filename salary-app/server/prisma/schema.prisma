@@ -14,6 +14,8 @@ model User {
   googleId   String   @unique
   pictureUrl String?
   currency   String   @default("SAR")
+  autoSaveEnabled Boolean @default(false)
+  autoSavePercent Float   @default(20)
   createdAt  DateTime @default(now())
 
   categories     Category[]

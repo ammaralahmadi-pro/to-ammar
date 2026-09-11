@@ -8,6 +8,7 @@ import { api } from '../../lib/api';
 import { CATEGORY_GROUPS } from '../../lib/categoryGroups';
 
 const EMPTY_FORM = { name: '', type: 'percentage', value: '', group: 'variable' };
+const DEFAULT_TEMPLATE = { needs: 50, wants: 30, savings: 20 };
 
 export default function SetupPage() {
   const router = useRouter();
@@ -16,6 +17,12 @@ export default function SetupPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
+  const [template, setTemplate] = useState(DEFAULT_TEMPLATE);
+  const [templateError, setTemplateError] = useState('');
+  const [templateSaving, setTemplateSaving] = useState(false);
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(false);
+  const [autoSavePercent, setAutoSavePercent] = useState('20');
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -27,10 +34,49 @@ export default function SetupPage() {
   useEffect(() => {
     api
       .me()
-      .then(load)
+      .then((res) => {
+        setAutoSaveEnabled(res.user.autoSaveEnabled);
+        setAutoSavePercent(String(res.user.autoSavePercent));
+        return load();
+      })
       .catch(() => router.replace('/login'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const templateTotal = Number(template.needs || 0) + Number(template.wants || 0) + Number(template.savings || 0);
+
+  async function handleApplyTemplate() {
+    setTemplateError('');
+    if (Math.round(templateTotal) !== 100) {
+      setTemplateError('مجموع النسب لازم يكون 100%');
+      return;
+    }
+    setTemplateSaving(true);
+    try {
+      await api.applyBudgetTemplate({
+        needs: Number(template.needs),
+        wants: Number(template.wants),
+        savings: Number(template.savings),
+      });
+      await load();
+    } catch {
+      setTemplateError('تعذّر تطبيق القالب');
+    } finally {
+      setTemplateSaving(false);
+    }
+  }
+
+  async function handleSaveSettings() {
+    setSettingsSaving(true);
+    try {
+      await api.updateSettings({
+        autoSaveEnabled,
+        autoSavePercent: Number(autoSavePercent) || 0,
+      });
+    } finally {
+      setSettingsSaving(false);
+    }
+  }
 
   const percentTotal = categories
     .filter((c) => c.type === 'percentage')
@@ -81,6 +127,101 @@ export default function SetupPage() {
   return (
     <Shell>
       <h1 className="font-display font-extrabold text-2xl mb-6">الراتب والفئات</h1>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div className="bg-surface shadow-card rounded-2xl p-6">
+          <h2 className="font-display font-bold mb-1">قالب 50/30/20</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            يضيف 3 فئات نسبية جاهزة (احتياجات/رغبات/ادخار) بجانب فئاتك الحالية دون حذف أي شيء.
+          </p>
+          <div className="grid grid-cols-3 gap-2 mb-3">
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">احتياجات %</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={template.needs}
+                onChange={(e) => setTemplate({ ...template, needs: e.target.value })}
+                className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">رغبات %</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={template.wants}
+                onChange={(e) => setTemplate({ ...template, wants: e.target.value })}
+                className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-500 mb-1">ادخار %</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                value={template.savings}
+                onChange={(e) => setTemplate({ ...template, savings: e.target.value })}
+                className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm"
+              />
+            </div>
+          </div>
+          <p className={`text-xs mb-3 ${templateTotal === 100 ? 'text-gray-500' : 'text-danger'}`}>
+            المجموع: {templateTotal}%
+          </p>
+          {templateError && <p className="text-danger text-sm mb-3">{templateError}</p>}
+          <button
+            onClick={handleApplyTemplate}
+            disabled={templateSaving}
+            className="w-full py-2.5 rounded-lg bg-primary hover:bg-primarydark hover:shadow-glow text-white font-semibold disabled:opacity-50"
+          >
+            {templateSaving ? 'جارِ التطبيق...' : 'تطبيق القالب'}
+          </button>
+        </div>
+
+        <div className="bg-surface shadow-card rounded-2xl p-6">
+          <h2 className="font-display font-bold mb-1">الادخار التلقائي (ادفع لنفسك أولاً)</h2>
+          <p className="text-sm text-gray-500 mb-4">
+            عند تفعيله، بمجرد حفظ راتب الشهر يُسجَّل تلقائيًا مصروف بنسبة من دخلك في أول فئة ادخار عندك — كأنك ادخرته فورًا.
+          </p>
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-medium text-gray-700">تفعيل الادخار التلقائي</span>
+            <button
+              onClick={() => setAutoSaveEnabled(!autoSaveEnabled)}
+              className={`w-12 h-7 rounded-full transition-colors relative ${autoSaveEnabled ? 'bg-primary' : 'bg-gray-200'}`}
+              aria-pressed={autoSaveEnabled}
+            >
+              <motion.span
+                layout
+                className="absolute top-1 w-5 h-5 rounded-full bg-white"
+                style={{ [autoSaveEnabled ? 'right' : 'left']: 4 }}
+              />
+            </button>
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">النسبة المقتطعة (%)</label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={autoSavePercent}
+              onChange={(e) => setAutoSavePercent(e.target.value)}
+              disabled={!autoSaveEnabled}
+              className="w-full border border-gray-200 rounded-lg px-3 py-2 disabled:opacity-50"
+            />
+          </div>
+          <button
+            onClick={handleSaveSettings}
+            disabled={settingsSaving}
+            className="w-full py-2.5 rounded-lg bg-primary hover:bg-primarydark hover:shadow-glow text-white font-semibold disabled:opacity-50"
+          >
+            {settingsSaving ? 'جارِ الحفظ...' : 'حفظ الإعداد'}
+          </button>
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-surface shadow-card rounded-2xl p-6">
