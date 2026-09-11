@@ -8,6 +8,7 @@ import { api } from '../lib/api';
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'الرئيسية' },
   { href: '/setup', label: 'الراتب والفئات' },
+  { href: '/plan', label: 'الخطة' },
 ];
 
 export default function Shell({ children, onAddExpense }) {
