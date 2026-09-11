@@ -33,6 +33,7 @@ function Row({ label, value, color }) {
 
 export default function SavingsSuggestions({ income: initialIncome, categories = [] }) {
   const [incomeInput, setIncomeInput] = useState(initialIncome ? String(initialIncome) : '');
+  const [isSurplus, setIsSurplus] = useState(false);
   const income = Number(incomeInput) || 0;
 
   if (!initialIncome || initialIncome <= 0) return null;
@@ -48,10 +49,17 @@ export default function SavingsSuggestions({ income: initialIncome, categories =
   const surplusWants = surplus > 0 ? surplus * 0.6 : 0;
   const surplusSavings = surplus > 0 ? surplus * 0.4 : 0;
 
-  const payYourselfPercent = 15;
+  // "فائض صافي": المبلغ نفسه بعد ما خُصمت الالتزامات فعليًا، فما نطرح ولا نطبّق 50/30/20 عليه
+  const netSurplus60 = income * 0.6;
+  const netSurplus40 = income * 0.4;
+  const netSurplusHalf = income * 0.5;
+  const netSurplusPayFirst = income * 0.4;
+  const netSurplusWeekly = income / 4;
+
+  const payYourselfPercent = isSurplus ? 40 : 15;
   const payYourselfAmount = (income * payYourselfPercent) / 100;
 
-  const weeklyEnvelope = (income * 0.3) / 4;
+  const weeklyEnvelope = isSurplus ? netSurplusWeekly : (income * 0.3) / 4;
 
   const escalationMonths = [2, 3, 4, 5].map((pct, i) => ({
     month: i + 1,
@@ -89,51 +97,81 @@ export default function SavingsSuggestions({ income: initialIncome, categories =
         </button>
       </div>
 
+      <label className="flex items-center gap-2 mb-4 text-sm text-gray-500 cursor-pointer w-fit">
+        <input
+          type="checkbox"
+          checked={isSurplus}
+          onChange={(e) => setIsSurplus(e.target.checked)}
+          className="accent-primary"
+        />
+        هذا المبلغ فائض صافي بعد الالتزامات (مو راتب كامل)
+      </label>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Card
-          title="الفائض بعد الالتزامات"
-          tag="مبني على فئاتك"
-          description="دخلك مطروح منه الالتزامات والديون والفواتير الثابتة المخطط لها، مع توزيع مقترح للباقي."
-        >
-          <Row label="إجمالي الالتزامات والفواتير" value={obligations} />
-          <Row label="الفائض المتبقي" value={surplus} color={surplus < 0 ? 'text-danger' : 'text-success'} />
-          {surplus > 0 ? (
-            <>
-              <Row label="مقترح لرغبات ورفاهية (60%)" value={surplusWants} />
-              <Row label="مقترح للادخار (40%)" value={surplusSavings} color="text-success" />
-            </>
-          ) : (
-            <p className="text-xs text-danger mt-2">التزاماتك تتجاوز دخلك هذا الشهر — راجع فئات الالتزامات والفواتير.</p>
-          )}
-        </Card>
+        {isSurplus ? (
+          <Card
+            title="توزيع الفائض الصافي"
+            tag="لمبلغ متبقي"
+            description="التزاماتك مخصومة أصلاً من هذا المبلغ، فنوزّعه مباشرة بدل ما نطبّق نسب راتب كامل عليه."
+          >
+            <Row label="تقسيم 60% رغبات / 40% ادخار" value={netSurplus60} />
+            <Row label="نفس التقسيم — الادخار" value={netSurplus40} color="text-success" />
+            <Row label="تقسيم متوازن 50/50 لكل جانب" value={netSurplusHalf} />
+            <Row label="ادفع لنفسك أولاً (40% ادخار)" value={netSurplusPayFirst} color="text-success" />
+            <Row label="ظرف أسبوعي (÷4 أسابيع)" value={netSurplusWeekly} />
+          </Card>
+        ) : (
+          <>
+            <Card
+              title="الفائض بعد الالتزامات"
+              tag="مبني على فئاتك"
+              description="دخلك مطروح منه الالتزامات والديون والفواتير الثابتة المخطط لها، مع توزيع مقترح للباقي."
+            >
+              <Row label="إجمالي الالتزامات والفواتير" value={obligations} />
+              <Row label="الفائض المتبقي" value={surplus} color={surplus < 0 ? 'text-danger' : 'text-success'} />
+              {surplus > 0 ? (
+                <>
+                  <Row label="مقترح لرغبات ورفاهية (60%)" value={surplusWants} />
+                  <Row label="مقترح للادخار (40%)" value={surplusSavings} color="text-success" />
+                </>
+              ) : (
+                <p className="text-xs text-danger mt-2">التزاماتك تتجاوز دخلك هذا الشهر — راجع فئات الالتزامات والفواتير.</p>
+              )}
+            </Card>
 
-        <Card
-          title="قاعدة 50/30/20"
-          tag="الأكثر شيوعًا"
-          description="نظام موزون: نصف الدخل للاحتياجات، والباقي بين الرغبات والادخار."
-        >
-          <Row label="احتياجات أساسية (50%)" value={needs} />
-          <Row label="رغبات ورفاهية (30%)" value={wants} />
-          <Row label="ادخار واستثمار (20%)" value={savings20} color="text-success" />
-        </Card>
+            <Card
+              title="قاعدة 50/30/20"
+              tag="الأكثر شيوعًا"
+              description="نظام موزون: نصف الدخل للاحتياجات، والباقي بين الرغبات والادخار."
+            >
+              <Row label="احتياجات أساسية (50%)" value={needs} />
+              <Row label="رغبات ورفاهية (30%)" value={wants} />
+              <Row label="ادخار واستثمار (20%)" value={savings20} color="text-success" />
+            </Card>
+          </>
+        )}
 
-        <Card
-          title="ادفع لنفسك أولاً"
-          tag="Pay Yourself First"
-          description="عامل الادخار كالتزام إجباري يُقتطع فور نزول الراتب، مثال بنسبة 15%."
-        >
-          <Row label={`يُدَّخر فورًا (${payYourselfPercent}%)`} value={payYourselfAmount} color="text-success" />
-          <Row label="يتبقى للعيش عليه" value={income - payYourselfAmount} />
-        </Card>
+        {!isSurplus && (
+          <Card
+            title="ادفع لنفسك أولاً"
+            tag="Pay Yourself First"
+            description={`عامل الادخار كالتزام إجباري يُقتطع فور نزول الراتب، مثال بنسبة ${payYourselfPercent}%.`}
+          >
+            <Row label={`يُدَّخر فورًا (${payYourselfPercent}%)`} value={payYourselfAmount} color="text-success" />
+            <Row label="يتبقى للعيش عليه" value={income - payYourselfAmount} />
+          </Card>
+        )}
 
-        <Card
-          title="الأظرف الرقمية"
-          tag="Envelopes"
-          description="خصّص ميزانية أسبوعية ثابتة للمصاريف المتغيرة، وقف الصرف بمجرد نفادها."
-        >
-          <Row label="ميزانية أسبوعية مقترحة" value={weeklyEnvelope} />
-          <p className="text-xs text-gray-500 mt-2">مبنية على 30% من دخلك مقسّمة على 4 أسابيع.</p>
-        </Card>
+        {!isSurplus && (
+          <Card
+            title="الأظرف الرقمية"
+            tag="Envelopes"
+            description="خصّص ميزانية أسبوعية ثابتة للمصاريف المتغيرة، وقف الصرف بمجرد نفادها."
+          >
+            <Row label="ميزانية أسبوعية مقترحة" value={weeklyEnvelope} />
+            <p className="text-xs text-gray-500 mt-2">مبنية على 30% من دخلك مقسّمة على 4 أسابيع.</p>
+          </Card>
+        )}
 
         <Card
           title="الادخار التدريجي"
