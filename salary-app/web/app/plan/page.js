@@ -14,10 +14,10 @@ const MONTHS = [
 ];
 
 const ROWS = [
-  { label: '1. الإيرادات (الراتب + إضافي)', values: [15901, 12901, 12901, 12901], bold: true },
+  { label: '1. الإيرادات (الراتب + إضافي)', values: [15901, 12901, 12901, 12901], bold: true, colorClass: 'text-success' },
   { label: '2. الالتزامات الثابتة (إيجار وقروض)', values: [-10600, -10600, -10600, -10600] },
   { label: '3. سداد الدين الفوري', values: [-2500, 0, 0, 0] },
-  { label: 'المتبقي للتحكم', values: [2801, 2301, 2301, 2301], bold: true, highlight: true },
+  { label: 'المتبقي للتحكم', values: [2801, 2301, 2301, 2301], bold: true, highlight: true, colorClass: 'text-warning' },
   { label: '4. قسط شي إن', values: [-544.11, -544.11, -544.11, -544.11] },
   {
     label: '5. تجميع المناسبات (شهريًا)',
@@ -33,13 +33,13 @@ const ROWS = [
   },
 ];
 
-function Cell({ value, bold, success }) {
+function Cell({ value, bold, success, colorClass }) {
   if (value === 0) {
     return <span className="text-gray-500">{formatCurrency(0)}</span>;
   }
   const negative = value < 0;
   const text = negative ? `(${formatCurrency(Math.abs(value))})` : formatCurrency(value);
-  const color = negative ? 'text-danger' : success ? 'text-success' : 'text-gray-800';
+  const color = negative ? 'text-danger' : colorClass || (success ? 'text-success' : 'text-gray-800');
   return <span className={`${bold ? 'font-bold' : ''} ${color}`}>{text}</span>;
 }
 
@@ -90,7 +90,7 @@ export default function PlanPage() {
                   </td>
                   {row.values.map((value, i) => (
                     <td key={i} className="px-4 py-3">
-                      <Cell value={value} bold={row.bold} success={row.success} />
+                      <Cell value={value} bold={row.bold} success={row.success} colorClass={row.colorClass} />
                       {row.notes?.[i] && <div className="text-xs text-gray-400 mt-0.5">({row.notes[i]})</div>}
                     </td>
                   ))}
