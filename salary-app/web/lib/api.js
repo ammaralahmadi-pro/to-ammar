@@ -75,4 +75,5 @@ export const api = {
   deleteExpense: (id) => request(`/expenses/${id}`, { method: 'DELETE' }),
 
   getDashboard: (year, month) => request(`/dashboard/${year}/${month}`),
+  getTrend: (months = 6) => request(`/dashboard/trend?months=${months}`),
 };

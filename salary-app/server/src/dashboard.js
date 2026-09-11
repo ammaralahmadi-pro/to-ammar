@@ -8,6 +8,38 @@ router.use(requireAuth);
 // نسبة الاستهلاك التي تُطلق تنبيه الاقتراب من الحد (المتطلب 4.8)
 const WARNING_THRESHOLD = 0.8;
 
+router.get('/trend', async (req, res) => {
+  const months = Math.min(Number(req.query.months) || 6, 12);
+  const now = new Date();
+  const periods = [];
+  for (let i = months - 1; i >= 0; i -= 1) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    periods.push({ year: d.getFullYear(), month: d.getMonth() + 1 });
+  }
+
+  const [salaries, expenses] = await Promise.all([
+    prisma.monthlySalary.findMany({
+      where: { userId: req.userId, OR: periods.map((p) => ({ year: p.year, month: p.month })) },
+    }),
+    prisma.expense.findMany({
+      where: { userId: req.userId, OR: periods.map((p) => ({ year: p.year, month: p.month })) },
+    }),
+  ]);
+
+  let cumulative = 0;
+  const trend = periods.map(({ year, month }) => {
+    const salary = salaries.find((s) => s.year === year && s.month === month);
+    const income = (salary?.amount || 0) + (salary?.extraIncome || 0);
+    const expense = expenses
+      .filter((e) => e.year === year && e.month === month)
+      .reduce((sum, e) => sum + e.amount, 0);
+    cumulative += income - expense;
+    return { year, month, income, expense, net: income - expense, cumulative };
+  });
+
+  res.json({ trend });
+});
+
 router.get('/:year/:month', async (req, res) => {
   const year = Number(req.params.year);
   const month = Number(req.params.month);

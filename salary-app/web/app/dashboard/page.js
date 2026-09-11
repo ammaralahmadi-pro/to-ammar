@@ -6,6 +6,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Shell from '../../components/Shell';
 import MonthNav from '../../components/MonthNav';
 import CategoryCard from '../../components/CategoryCard';
+import BudgetTable from '../../components/BudgetTable';
+import VarianceChart from '../../components/VarianceChart';
+import TrendChart from '../../components/TrendChart';
 import SalaryForm from '../../components/SalaryForm';
 import AddExpenseModal from '../../components/AddExpenseModal';
 import AllocationDonut from '../../components/AllocationDonut';
@@ -35,19 +38,22 @@ export default function DashboardPage() {
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [extraIncomeSummary, setExtraIncomeSummary] = useState({ total: 0, monthsCount: 0 });
+  const [trend, setTrend] = useState([]);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [dashboard, cats, expensesRes, extraIncome] = await Promise.all([
+    const [dashboard, cats, expensesRes, extraIncome, trendRes] = await Promise.all([
       api.getDashboard(period.year, period.month),
       api.listCategories(),
       api.listExpenses(period.year, period.month),
       api.getExtraIncomeSummary(),
+      api.getTrend(6),
     ]);
     setData(dashboard);
     setCategories(cats.categories);
     setExpenses(expensesRes.expenses);
     setExtraIncomeSummary(extraIncome);
+    setTrend(trendRes.trend);
     setLoading(false);
   }, [period]);
 
@@ -216,26 +222,26 @@ export default function DashboardPage() {
             const items = otherCategories.filter((c) => (c.group || 'variable') === g.key);
             if (items.length === 0) return null;
             return (
-              <div key={g.key} className="mb-8">
-                <div className="flex items-baseline gap-2 mb-3">
-                  <h3 className="font-display font-bold">{g.label}</h3>
-                  <span className="text-xs text-gray-500">{g.hint}</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <AnimatePresence>
-                    {items.map((category) => (
-                      <CategoryCard
-                        key={category.id}
-                        category={category}
-                        onUpdate={handleUpdateCategory}
-                        onQuickAdd={handleQuickAddExpense}
-                      />
-                    ))}
-                  </AnimatePresence>
-                </div>
-              </div>
+              <BudgetTable
+                key={g.key}
+                title={g.label}
+                hint={g.hint}
+                items={items}
+                polarity={g.polarity}
+                onUpdate={handleUpdateCategory}
+                onQuickAdd={handleQuickAddExpense}
+              />
             );
           })}
+
+          {(() => {
+            const variableItems = otherCategories.filter((c) => (c.group || 'variable') === 'variable');
+            return variableItems.length > 0 ? (
+              <VarianceChart title="المصاريف المتغيرة" items={variableItems} polarity="lowerBetter" />
+            ) : null;
+          })()}
+
+          <TrendChart trend={trend} />
 
           <ExpenseLog
             expenses={expenses}
