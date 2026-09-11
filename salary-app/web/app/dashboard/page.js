@@ -19,6 +19,7 @@ import ExpenseLog from '../../components/ExpenseLog';
 import IncomeSummaryCard from '../../components/IncomeSummaryCard';
 import ExtraIncomeSummaryCard from '../../components/ExtraIncomeSummaryCard';
 import FinancialScoreCards from '../../components/FinancialScoreCards';
+import SavingsSuggestions from '../../components/SavingsSuggestions';
 import { api } from '../../lib/api';
 import { formatCurrency } from '../../lib/format';
 import { CATEGORY_GROUPS } from '../../lib/categoryGroups';
@@ -204,6 +205,8 @@ export default function DashboardPage() {
               <FinancialScoreCards cards={scoreCards} />
             </div>
           )}
+
+          <SavingsSuggestions income={data.totalIncome} />
 
           <h2 className="font-display font-bold text-lg mb-3">تفصيل الفئات</h2>
 
