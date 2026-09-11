@@ -5,6 +5,8 @@ const { requireAuth } = require('./middleware');
 const router = express.Router();
 router.use(requireAuth);
 
+const GROUPS = ['debts', 'bills', 'variable', 'savings'];
+
 router.get('/', async (req, res) => {
   const categories = await prisma.category.findMany({
     where: { userId: req.userId },
@@ -14,13 +16,16 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const { name, type, value } = req.body || {};
+  const { name, type, value, group } = req.body || {};
   if (!name || !['percentage', 'fixed'].includes(type) || typeof value !== 'number' || value < 0) {
     return res.status(400).json({ error: 'بيانات الفئة غير صحيحة' });
   }
+  if (group !== undefined && !GROUPS.includes(group)) {
+    return res.status(400).json({ error: 'مجموعة غير صحيحة' });
+  }
   const count = await prisma.category.count({ where: { userId: req.userId } });
   const category = await prisma.category.create({
-    data: { userId: req.userId, name, type, value, sortOrder: count },
+    data: { userId: req.userId, name, type, value, group: group || 'variable', sortOrder: count },
   });
   res.status(201).json({ category });
 });
@@ -29,7 +34,7 @@ router.patch('/:id', async (req, res) => {
   const category = await prisma.category.findFirst({ where: { id: req.params.id, userId: req.userId } });
   if (!category) return res.status(404).json({ error: 'الفئة غير موجودة' });
 
-  const { name, type, value } = req.body || {};
+  const { name, type, value, group } = req.body || {};
   const data = {};
   if (name !== undefined) data.name = name;
   if (type !== undefined) {
@@ -39,6 +44,10 @@ router.patch('/:id', async (req, res) => {
   if (value !== undefined) {
     if (typeof value !== 'number' || value < 0) return res.status(400).json({ error: 'قيمة غير صحيحة' });
     data.value = value;
+  }
+  if (group !== undefined) {
+    if (!GROUPS.includes(group)) return res.status(400).json({ error: 'مجموعة غير صحيحة' });
+    data.group = group;
   }
 
   const updated = await prisma.category.update({ where: { id: category.id }, data });

@@ -18,6 +18,7 @@ import ExtraIncomeSummaryCard from '../../components/ExtraIncomeSummaryCard';
 import FinancialScoreCards from '../../components/FinancialScoreCards';
 import { api } from '../../lib/api';
 import { formatCurrency } from '../../lib/format';
+import { CATEGORY_GROUPS } from '../../lib/categoryGroups';
 
 function currentPeriod() {
   const now = new Date();
@@ -211,18 +212,30 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-            <AnimatePresence>
-              {otherCategories.map((category) => (
-                <CategoryCard
-                  key={category.id}
-                  category={category}
-                  onUpdate={handleUpdateCategory}
-                  onQuickAdd={handleQuickAddExpense}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
+          {CATEGORY_GROUPS.map((g) => {
+            const items = otherCategories.filter((c) => (c.group || 'variable') === g.key);
+            if (items.length === 0) return null;
+            return (
+              <div key={g.key} className="mb-8">
+                <div className="flex items-baseline gap-2 mb-3">
+                  <h3 className="font-display font-bold">{g.label}</h3>
+                  <span className="text-xs text-gray-500">{g.hint}</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <AnimatePresence>
+                    {items.map((category) => (
+                      <CategoryCard
+                        key={category.id}
+                        category={category}
+                        onUpdate={handleUpdateCategory}
+                        onQuickAdd={handleQuickAddExpense}
+                      />
+                    ))}
+                  </AnimatePresence>
+                </div>
+              </div>
+            );
+          })}
 
           <ExpenseLog
             expenses={expenses}

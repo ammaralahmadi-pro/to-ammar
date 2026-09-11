@@ -22,12 +22,14 @@ model User {
 }
 
 // النوع: "percentage" نسبة من الراتب، أو "fixed" مبلغ ثابت
+// المجموعة: "debts" التزامات وديون، "bills" فواتير ثابتة، "variable" مصاريف متغيرة، "savings" ادخار وأهداف مالية
 model Category {
   id        String   @id @default(cuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name      String
   type      String   @default("percentage")
+  group     String   @default("variable")
   value     Float
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())

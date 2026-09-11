@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '../lib/format';
+import { CATEGORY_GROUPS } from '../lib/categoryGroups';
 
 const STATUS_STYLES = {
   ok: { bar: 'bg-success', text: 'text-success' },
@@ -13,7 +14,12 @@ const STATUS_STYLES = {
 
 export default function CategoryCard({ category, onUpdate, onQuickAdd, featured }) {
   const [editing, setEditing] = useState(false);
-  const [form, setForm] = useState({ name: category.name, type: category.type, value: String(category.value) });
+  const [form, setForm] = useState({
+    name: category.name,
+    type: category.type,
+    value: String(category.value),
+    group: category.group || 'variable',
+  });
   const [saving, setSaving] = useState(false);
   const [quickAmount, setQuickAmount] = useState('');
   const [addingExpense, setAddingExpense] = useState(false);
@@ -37,7 +43,7 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd, featured 
   function startEdit(e) {
     e.preventDefault();
     e.stopPropagation();
-    setForm({ name: category.name, type: category.type, value: String(category.value) });
+    setForm({ name: category.name, type: category.type, value: String(category.value), group: category.group || 'variable' });
     setEditing(true);
   }
 
@@ -48,7 +54,7 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd, featured 
     if (!form.name.trim() || !value || value <= 0) return;
     setSaving(true);
     try {
-      await onUpdate(category.id, { name: form.name, type: form.type, value });
+      await onUpdate(category.id, { name: form.name, type: form.type, value, group: form.group });
       setEditing(false);
     } finally {
       setSaving(false);
@@ -73,6 +79,20 @@ export default function CategoryCard({ category, onUpdate, onQuickAdd, featured 
             className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm font-semibold"
             autoFocus
           />
+          <div className="grid grid-cols-2 gap-1.5">
+            {CATEGORY_GROUPS.map((g) => (
+              <button
+                key={g.key}
+                type="button"
+                onClick={() => setForm({ ...form, group: g.key })}
+                className={`py-1 rounded-lg border text-[11px] font-semibold ${
+                  form.group === g.key ? 'bg-primary text-white border-primary' : 'border-gray-200 text-gray-600'
+                }`}
+              >
+                {g.label}
+              </button>
+            ))}
+          </div>
           <div className="flex gap-2">
             <button
               type="button"

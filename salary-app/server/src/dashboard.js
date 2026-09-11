@@ -38,8 +38,12 @@ router.get('/:year/:month', async (req, res) => {
     const percentUsed = planned > 0 ? spent / planned : spent > 0 ? Infinity : 0;
 
     let status = 'ok';
-    if (percentUsed > 1) status = 'over';
-    else if (percentUsed >= WARNING_THRESHOLD && percentUsed < 1) status = 'warning';
+    if (category.group === 'savings') {
+      if (percentUsed >= WARNING_THRESHOLD && percentUsed < 1) status = 'warning';
+    } else {
+      if (percentUsed > 1) status = 'over';
+      else if (percentUsed >= WARNING_THRESHOLD && percentUsed < 1) status = 'warning';
+    }
 
     totalPlanned += planned;
     totalSpent += spent;
@@ -48,6 +52,7 @@ router.get('/:year/:month', async (req, res) => {
       id: category.id,
       name: category.name,
       type: category.type,
+      group: category.group,
       value: category.value,
       planned,
       spent,

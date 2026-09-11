@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
 import Shell from '../../components/Shell';
 import { api } from '../../lib/api';
+import { CATEGORY_GROUPS } from '../../lib/categoryGroups';
 
-const EMPTY_FORM = { name: '', type: 'percentage', value: '' };
+const EMPTY_FORM = { name: '', type: 'percentage', value: '', group: 'variable' };
 
 export default function SetupPage() {
   const router = useRouter();
@@ -37,7 +38,7 @@ export default function SetupPage() {
 
   function startEdit(category) {
     setEditingId(category.id);
-    setForm({ name: category.name, type: category.type, value: String(category.value) });
+    setForm({ name: category.name, type: category.type, value: String(category.value), group: category.group || 'variable' });
   }
 
   function cancelEdit() {
@@ -56,9 +57,9 @@ export default function SetupPage() {
     }
     try {
       if (editingId) {
-        await api.updateCategory(editingId, { name: form.name, type: form.type, value });
+        await api.updateCategory(editingId, { name: form.name, type: form.type, value, group: form.group });
       } else {
-        await api.createCategory({ name: form.name, type: form.type, value });
+        await api.createCategory({ name: form.name, type: form.type, value, group: form.group });
       }
       cancelEdit();
       load();
@@ -93,32 +94,44 @@ export default function SetupPage() {
           {categories.length === 0 ? (
             <p className="text-gray-500 text-sm">لا توجد فئات بعد. أضف أول فئة من النموذج.</p>
           ) : (
-            <ul className="divide-y divide-gray-100">
-              <AnimatePresence>
-                {categories.map((c) => (
-                  <motion.li
-                    key={c.id}
-                    layout
-                    initial={{ opacity: 0, x: -12 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: 12 }}
-                    transition={{ duration: 0.2 }}
-                    className="py-3 flex items-center justify-between"
-                  >
-                    <div>
-                      <p className="font-medium text-gray-800">{c.name}</p>
-                      <p className="text-sm text-gray-500">
-                        {c.type === 'percentage' ? `${c.value}% من الراتب` : `${c.value} ر.س ثابت`}
-                      </p>
-                    </div>
-                    <div className="flex gap-3 text-sm">
-                      <button onClick={() => startEdit(c)} className="text-primary font-medium">تعديل</button>
-                      <button onClick={() => handleDelete(c.id)} className="text-danger font-medium">حذف</button>
-                    </div>
-                  </motion.li>
-                ))}
-              </AnimatePresence>
-            </ul>
+            <div className="space-y-6">
+              {CATEGORY_GROUPS.map((g) => {
+                const items = categories.filter((c) => (c.group || 'variable') === g.key);
+                if (items.length === 0) return null;
+                return (
+                  <div key={g.key}>
+                    <h3 className="text-sm font-bold text-gray-600 mb-1">{g.label}</h3>
+                    <p className="text-xs text-gray-400 mb-2">{g.hint}</p>
+                    <ul className="divide-y divide-gray-100">
+                      <AnimatePresence>
+                        {items.map((c) => (
+                          <motion.li
+                            key={c.id}
+                            layout
+                            initial={{ opacity: 0, x: -12 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 12 }}
+                            transition={{ duration: 0.2 }}
+                            className="py-3 flex items-center justify-between"
+                          >
+                            <div>
+                              <p className="font-medium text-gray-800">{c.name}</p>
+                              <p className="text-sm text-gray-500">
+                                {c.type === 'percentage' ? `${c.value}% من الراتب` : `${c.value} ر.س ثابت`}
+                              </p>
+                            </div>
+                            <div className="flex gap-3 text-sm">
+                              <button onClick={() => startEdit(c)} className="text-primary font-medium">تعديل</button>
+                              <button onClick={() => handleDelete(c.id)} className="text-danger font-medium">حذف</button>
+                            </div>
+                          </motion.li>
+                        ))}
+                      </AnimatePresence>
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
           )}
         </div>
 
@@ -132,6 +145,23 @@ export default function SetupPage() {
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className="w-full border border-gray-200 rounded-lg px-3 py-2"
               />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">المجموعة</label>
+              <div className="grid grid-cols-2 gap-2">
+                {CATEGORY_GROUPS.map((g) => (
+                  <button
+                    key={g.key}
+                    type="button"
+                    onClick={() => setForm({ ...form, group: g.key })}
+                    className={`py-2 rounded-lg border text-xs font-semibold ${
+                      form.group === g.key ? 'bg-primary text-white border-primary' : 'border-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">طريقة التوزيع</label>
