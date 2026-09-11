@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { formatCurrency } from '../lib/format';
 
@@ -30,8 +31,11 @@ function Row({ label, value, color }) {
   );
 }
 
-export default function SavingsSuggestions({ income, categories = [] }) {
-  if (!income || income <= 0) return null;
+export default function SavingsSuggestions({ income: initialIncome, categories = [] }) {
+  const [incomeInput, setIncomeInput] = useState(initialIncome ? String(initialIncome) : '');
+  const income = Number(incomeInput) || 0;
+
+  if (!initialIncome || initialIncome <= 0) return null;
 
   const needs = income * 0.5;
   const wants = income * 0.3;
@@ -62,7 +66,28 @@ export default function SavingsSuggestions({ income, categories = [] }) {
   return (
     <div className="mb-8">
       <h2 className="font-display font-bold text-lg mb-3">مقترحات أنظمة توفير الراتب</h2>
-      <p className="text-sm text-gray-500 mb-4">أمثلة محسوبة فعليًا على دخلك الحالي ({formatCurrency(income)})، جرّب أي نظام يناسبك.</p>
+      <p className="text-sm text-gray-500 mb-3">
+        أمثلة محسوبة على المبلغ اللي تدخله (افتراضيًا دخلك الحالي)، جرّب أي نظام يناسبك.
+      </p>
+      <div className="flex items-center gap-2 mb-4 max-w-xs">
+        <label className="text-sm text-gray-500 whitespace-nowrap">المبلغ (ر.س)</label>
+        <input
+          id="savings-suggestions-income"
+          type="number"
+          min="0"
+          step="0.01"
+          value={incomeInput}
+          onChange={(e) => setIncomeInput(e.target.value)}
+          className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-sm"
+        />
+        <button
+          type="button"
+          onClick={() => setIncomeInput(String(initialIncome))}
+          className="text-xs text-primary font-semibold whitespace-nowrap"
+        >
+          إعادة تعيين
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card
