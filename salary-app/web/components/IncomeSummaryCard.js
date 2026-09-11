@@ -46,8 +46,8 @@ export default function IncomeSummaryCard(props) {
   const shouldReduceMotion = useReducedMotion();
   const shouldAnimate = enableAnimations && !shouldReduceMotion;
 
-  const outerDots = generateDots(outerDotsCount, 185, 203, 200);
-  const innerDots = generateDots(innerDotsCount, 155, 203, 200);
+  const outerDots = generateDots(outerDotsCount, 208, 224, 224);
+  const innerDots = generateDots(innerDotsCount, 178, 224, 224);
   const total = baseSalary + extraIncome;
 
   return (
@@ -58,10 +58,10 @@ export default function IncomeSummaryCard(props) {
       variants={shouldAnimate ? containerVariants : {}}
     >
       <div className="bg-surface border border-gray-100 rounded-xl overflow-hidden shadow-card">
-        <div className="relative pl-4 pr-8 pb-4 pt-8 overflow-hidden">
+        <div className="relative px-4 pt-6 pb-4 overflow-hidden">
           <div className="absolute inset-0 bg-surface backdrop-blur-[2px] rounded-lg" />
 
-          <div className="relative w-full aspect-square max-w-[20rem] mx-auto">
+          <div className="relative w-full aspect-square max-w-[24rem] mx-auto">
             <svg className="w-full h-full" viewBox="0 0 448 448">
               {outerDots.map((dot, i) => (
                 <motion.circle
