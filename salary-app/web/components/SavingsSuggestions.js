@@ -30,12 +30,19 @@ function Row({ label, value, color }) {
   );
 }
 
-export default function SavingsSuggestions({ income }) {
+export default function SavingsSuggestions({ income, categories = [] }) {
   if (!income || income <= 0) return null;
 
   const needs = income * 0.5;
   const wants = income * 0.3;
   const savings20 = income * 0.2;
+
+  const obligations = categories
+    .filter((c) => c.group === 'debts' || c.group === 'bills')
+    .reduce((sum, c) => sum + c.planned, 0);
+  const surplus = income - obligations;
+  const surplusWants = surplus > 0 ? surplus * 0.6 : 0;
+  const surplusSavings = surplus > 0 ? surplus * 0.4 : 0;
 
   const payYourselfPercent = 15;
   const payYourselfAmount = (income * payYourselfPercent) / 100;
@@ -58,6 +65,23 @@ export default function SavingsSuggestions({ income }) {
       <p className="text-sm text-gray-500 mb-4">أمثلة محسوبة فعليًا على دخلك الحالي ({formatCurrency(income)})، جرّب أي نظام يناسبك.</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card
+          title="الفائض بعد الالتزامات"
+          tag="مبني على فئاتك"
+          description="دخلك مطروح منه الالتزامات والديون والفواتير الثابتة المخطط لها، مع توزيع مقترح للباقي."
+        >
+          <Row label="إجمالي الالتزامات والفواتير" value={obligations} />
+          <Row label="الفائض المتبقي" value={surplus} color={surplus < 0 ? 'text-danger' : 'text-success'} />
+          {surplus > 0 ? (
+            <>
+              <Row label="مقترح لرغبات ورفاهية (60%)" value={surplusWants} />
+              <Row label="مقترح للادخار (40%)" value={surplusSavings} color="text-success" />
+            </>
+          ) : (
+            <p className="text-xs text-danger mt-2">التزاماتك تتجاوز دخلك هذا الشهر — راجع فئات الالتزامات والفواتير.</p>
+          )}
+        </Card>
+
         <Card
           title="قاعدة 50/30/20"
           tag="الأكثر شيوعًا"

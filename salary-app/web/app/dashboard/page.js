@@ -206,7 +206,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <SavingsSuggestions income={data.totalIncome} />
+          <SavingsSuggestions income={data.totalIncome} categories={data.categories} />
 
           <h2 className="font-display font-bold text-lg mb-3">تفصيل الفئات</h2>
 
