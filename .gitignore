@@ -8,3 +8,8 @@ web/.env.local
 .next/
 web/.next/
 server/generated/
+
+# local skill-manager install artifacts (not project content)
+.agents/
+.claude/
+skills-lock.json
