@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/medication_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/medication_card.dart';
 import 'add_medication_screen.dart';
 import 'medication_detail_screen.dart';
@@ -27,7 +28,10 @@ class HomeScreen extends StatelessWidget {
             children: [
               if (active.isNotEmpty) ...[
                 const Text('الأدوية الحالية',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppTheme.primaryBlueDark)),
                 const SizedBox(height: 8),
                 ...active.map((med) => MedicationCard(
                       medication: med,
@@ -80,7 +84,7 @@ class _EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.medication_outlined, size: 72, color: Colors.grey),
+            Icon(Icons.medication_outlined, size: 72, color: AppTheme.primaryBlue),
             SizedBox(height: 16),
             Text(
               'لا توجد أدوية مضافة بعد.\nاضغط "إضافة دواء" للبدء بتنظيم جدول علاجك.',

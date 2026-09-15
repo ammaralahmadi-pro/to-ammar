@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'providers/medication_provider.dart';
 import 'screens/home_screen.dart';
 import 'services/notification_service.dart';
+import 'theme/app_theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -52,10 +53,7 @@ class _MedicationReminderAppState extends State<MedicationReminderApp> {
       child: MaterialApp(
         title: 'تذكير الأدوية',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          useMaterial3: true,
-          colorSchemeSeed: const Color(0xFF2E7D6B),
-        ),
+        theme: AppTheme.themeData(),
         builder: (context, child) {
           return Directionality(
             textDirection: TextDirection.rtl,

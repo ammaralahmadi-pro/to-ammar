@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../models/dose.dart';
 import '../providers/medication_provider.dart';
+import '../theme/app_theme.dart';
 import 'add_medication_screen.dart';
 
 class MedicationDetailScreen extends StatelessWidget {
@@ -91,12 +92,19 @@ class MedicationDetailScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text('جدول الجرعات', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text('جدول الجرعات',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                      color: AppTheme.primaryBlueDark)),
               const SizedBox(height: 8),
-              ...doses.map((dose) => _DoseTile(
-                    dose: dose,
-                    formattedTime: dateFormat.format(dose.scheduledAt),
-                    onMarkTaken: () => provider.markDoseTaken(dose.id),
+              ...doses.map((dose) => Card(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    child: _DoseTile(
+                      dose: dose,
+                      formattedTime: dateFormat.format(dose.scheduledAt),
+                      onMarkTaken: () => provider.markDoseTaken(dose.id),
+                    ),
                   )),
             ],
           ),
@@ -123,13 +131,17 @@ class _DoseTile extends StatelessWidget {
     return ListTile(
       leading: Icon(
         taken ? Icons.check_circle : Icons.radio_button_unchecked,
-        color: taken ? Colors.green : Colors.grey,
+        color: taken ? AppTheme.accentOrange : Colors.grey,
       ),
       title: Text(formattedTime),
       subtitle: taken ? const Text('تم أخذها') : const Text('لم تُؤخذ بعد'),
       trailing: taken
           ? null
-          : TextButton(onPressed: onMarkTaken, child: const Text('تعليم كمأخوذة')),
+          : TextButton(
+              style: TextButton.styleFrom(foregroundColor: AppTheme.primaryBlueDark),
+              onPressed: onMarkTaken,
+              child: const Text('تعليم كمأخوذة'),
+            ),
     );
   }
 }
