@@ -7,8 +7,9 @@ Google OAuth 2.0 لكل طرف، وتزامن ثنائي مباشر مع Google 
 ## البنية
 
 ```
-server/   خادم Node.js/Express — OAuth، تخزين الرموز المشفّرة، والتزامن مع Google Calendar API
-web/      واجهة Next.js + Tailwind CSS — تسجيل الدخول ولوحة المواعيد
+server/               خادم Node.js/Express — OAuth، تخزين الرموز المشفّرة، والتزامن مع Google Calendar API
+web/                  واجهة Next.js + Tailwind CSS — تسجيل الدخول ولوحة المواعيد
+medication_reminder/  مشروع Flutter منفصل لتذكير مواعيد الأدوية (راجع README الخاص به)
 ```
 
 ## كيف يعمل التزامن الثنائي
