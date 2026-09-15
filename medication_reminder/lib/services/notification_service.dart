@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
@@ -61,6 +62,9 @@ class NotificationService {
       StreamController<String>.broadcast();
 
   Future<void> init() async {
+    // الويب ليس منصة مستهدفة لهذا التطبيق ولا تدعمه حزمة الإشعارات المحلية؛
+    // هذا الحارس يمنع تعطّل التطبيق إذا شُغّل على الويب لأغراض المعاينة فقط.
+    if (kIsWeb) return;
     tz_data.initializeTimeZones();
     tz.setLocalLocation(tz.local);
 
@@ -117,6 +121,7 @@ class NotificationService {
     required String dosage,
     required DateTime scheduledAt,
   }) async {
+    if (kIsWeb) return;
     if (scheduledAt.isBefore(DateTime.now())) return;
 
     final tzTime = tz.TZDateTime.from(scheduledAt, tz.local);
@@ -151,10 +156,12 @@ class NotificationService {
   }
 
   Future<void> cancelNotification(int notificationId) async {
+    if (kIsWeb) return;
     await _plugin.cancel(notificationId);
   }
 
   Future<void> cancelAll() async {
+    if (kIsWeb) return;
     await _plugin.cancelAll();
   }
 }
