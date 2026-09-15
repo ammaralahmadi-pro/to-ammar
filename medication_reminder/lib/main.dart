@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/medication_provider.dart';
@@ -9,6 +10,9 @@ import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // مطلوب قبل أي استخدام لـ DateFormat بلغة 'ar'، وإلا يرمي استثناء عند بناء
+  // أي واجهة تعرض تاريخًا أو وقتًا.
+  await initializeDateFormatting('ar');
   await NotificationService.instance.init();
   runApp(const MedicationReminderApp());
 }
