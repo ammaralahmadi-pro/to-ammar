@@ -33,10 +33,12 @@ class MedicationCard extends StatelessWidget {
                 radius: 26,
                 backgroundColor: medication.isFinished
                     ? Colors.grey.shade200
-                    : AppTheme.accentOrange.withOpacity(0.18),
+                    : AppTheme.avatarColorFor(medication.id).withOpacity(0.18),
                 child: Icon(
                   Icons.medication_rounded,
-                  color: medication.isFinished ? Colors.grey : AppTheme.accentOrange,
+                  color: medication.isFinished
+                      ? Colors.grey
+                      : AppTheme.avatarColorFor(medication.id),
                 ),
               ),
               const SizedBox(width: 14),

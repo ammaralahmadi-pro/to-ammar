@@ -131,7 +131,7 @@ class _DoseTile extends StatelessWidget {
     return ListTile(
       leading: Icon(
         taken ? Icons.check_circle : Icons.radio_button_unchecked,
-        color: taken ? AppTheme.accentOrange : Colors.grey,
+        color: taken ? AppTheme.accentPink : Colors.grey,
       ),
       title: Text(formattedTime),
       subtitle: taken ? const Text('تم أخذها') : const Text('لم تُؤخذ بعد'),
