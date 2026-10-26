@@ -19,9 +19,7 @@
     "express": "^4.19.2",
     "google-auth-library": "^9.14.1",
     "googleapis": "^144.0.0",
-    "jsonwebtoken": "^9.0.2"
-  },
-  "devDependencies": {
+    "jsonwebtoken": "^9.0.2",
     "prisma": "^5.20.0"
   }
 }
